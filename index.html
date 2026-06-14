@@ -42,7 +42,7 @@ const STAT = {
   Descartado:      ["#555","rgba(85,85,85,0.10)"],
 };
 const NICHES = ["Gaming","Lifestyle","Tech","Educação","Entretenimento","Fitness","Culinária","Finanças","Moda","Negócios","Música","Outro"];
-const EMPTY  = { nome:"", plataforma:"YouTube", nicho:"", seguidores:"", contato:"", status:"Prospectando", observacoes:"" };
+const EMPTY  = { nome:"", plataforma:"YouTube", nicho:"", seguidores:"", contato:"", link:"", status:"Prospectando", observacoes:"" };
 
 const C = { bg:"#080808", surface:"#101010", card:"#131313", hover:"#1A1A1A", border:"#222", border2:"#2A2A2A", accent:"#FFF", text:"#F0F0F0", sub:"#AAAAAA", muted:"#555", red:"#FF4444" };
 const FF = "'Space Grotesk', system-ui, sans-serif";
@@ -132,6 +132,10 @@ function App() {
           r('input',{value:form.contato, onInput:e=>setForm(f=>({...f,contato:e.target.value})), placeholder:"e-mail, WhatsApp, @usuario...", style:iSt})
         ),
         r('div', null,
+          r('div',{style:lSt},"Link do Perfil"),
+          r('input',{value:form.link, onInput:e=>setForm(f=>({...f,link:e.target.value})), placeholder:"https://youtube.com/@canal", style:iSt})
+        ),
+        r('div', null,
           r('div',{style:lSt},"Observações"),
           r('textarea',{onInput:e=>setForm(f=>({...f,observacoes:e.target.value})), placeholder:"Notas sobre esse criador...", rows:3, style:{...iSt,resize:"vertical"}}, form.observacoes)
         )
@@ -181,6 +185,14 @@ function App() {
         c.contato && r('div',null,
           r('div',{style:lSt},"Contato"),
           r('div',{style:{fontSize:12,marginTop:4,color:C.sub,wordBreak:"break-all",lineHeight:1.4}}, c.contato)
+        ),
+        c.link && r('a', {href: c.link, target:"_blank", rel:"noopener noreferrer", style:{display:"flex",alignItems:"center",gap:6,marginTop:2,textDecoration:"none"}},
+          r('svg',{viewBox:"0 0 24 24",width:12,height:12,fill:"none",stroke:C.sub,strokeWidth:2,strokeLinecap:"round",strokeLinejoin:"round",style:{flexShrink:0}},
+            r('path',{d:"M18 13v6a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2V8a2 2 0 0 1 2-2h6"}),
+            r('polyline',{points:"15 3 21 3 21 9"}),
+            r('line',{x1:"10",y1:"14",x2:"21",y2:"3"})
+          ),
+          r('span',{style:{fontSize:12,color:C.sub,overflow:"hidden",textOverflow:"ellipsis",whiteSpace:"nowrap"}}, c.link.replace(/^https?:\/\/(www\.)?/,""))
         ),
         c.observacoes && r('div',{style:{background:"#0A0A0A",border:`1px solid ${C.border}`,borderRadius:8,padding:"9px 11px"}},
           r('div',{style:lSt},"Obs."),
