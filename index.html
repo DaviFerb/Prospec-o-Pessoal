@@ -1,0 +1,245 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+  <title>Prospecção</title>
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/react/18.2.0/umd/react.production.min.js"></script>
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/react-dom/18.2.0/umd/react-dom.production.min.js"></script>
+  <link href="https://fonts.googleapis.com/css2?family=Space+Grotesk:wght@400;500;600;700&display=swap" rel="stylesheet"/>
+  <style>
+    *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+    body { background: #080808; font-family: 'Space Grotesk', system-ui, sans-serif; }
+    select option { background: #111; color: #f0f0f0; }
+    ::-webkit-scrollbar { width: 6px; }
+    ::-webkit-scrollbar-track { background: #0a0a0a; }
+    ::-webkit-scrollbar-thumb { background: #2a2a2a; border-radius: 3px; }
+  </style>
+</head>
+<body>
+<div id="root"></div>
+<script>
+const { useState, useEffect } = React;
+const r = React.createElement;
+
+const PLATFORMS = ["YouTube","Instagram","TikTok","Twitter/X","Twitch","LinkedIn","Outro"];
+const PLAT_COLOR = { YouTube:"#FF4444", Instagram:"#C13584", TikTok:"#00C2CB", "Twitter/X":"#aaa", Twitch:"#9146FF", LinkedIn:"#0A66C2", Outro:"#666" };
+const STATUSES  = ["Prospectando","Contatado","Em negociação","Fechado","Descartado"];
+const STAT = {
+  Prospectando:    ["#E0A020","rgba(224,160,32,0.10)"],
+  Contatado:       ["#9B8BFF","rgba(155,139,255,0.10)"],
+  "Em negociação": ["#2EC4A0","rgba(46,196,160,0.10)"],
+  Fechado:         ["#5DB87A","rgba(93,184,122,0.10)"],
+  Descartado:      ["#555","rgba(85,85,85,0.10)"],
+};
+const NICHES = ["Gaming","Lifestyle","Tech","Educação","Entretenimento","Fitness","Culinária","Finanças","Moda","Negócios","Música","Outro"];
+const EMPTY  = { nome:"", plataforma:"YouTube", nicho:"", seguidores:"", contato:"", status:"Prospectando", observacoes:"" };
+
+const C = { bg:"#080808", surface:"#101010", card:"#131313", hover:"#1A1A1A", border:"#222", border2:"#2A2A2A", accent:"#FFF", text:"#F0F0F0", sub:"#AAAAAA", muted:"#555", red:"#FF4444" };
+const FF = "'Space Grotesk', system-ui, sans-serif";
+const sf = { fontFamily: FF };
+const iSt = { display:"block", width:"100%", boxSizing:"border-box", background:"#0A0A0A", border:"1px solid #222", borderRadius:8, padding:"9px 12px", color:C.text, fontSize:14, marginTop:5, fontFamily:FF, outline:"none" };
+const lSt = { fontSize:10, fontWeight:600, color:C.muted, textTransform:"uppercase", letterSpacing:"0.8px" };
+
+function initials(n) { return n.trim().split(" ").slice(0,2).map(w=>w[0]?.toUpperCase()).join(""); }
+
+function App() {
+  const [creators,   setCreators]   = useState([]);
+  const [loading,    setLoading]    = useState(true);
+  const [modal,      setModal]      = useState(false);
+  const [editId,     setEditId]     = useState(null);
+  const [form,       setForm]       = useState(EMPTY);
+  const [search,     setSearch]     = useState("");
+  const [fSt,        setFSt]        = useState("");
+  const [fPl,        setFPl]        = useState("");
+  const [hovered,    setHovered]    = useState(null);
+  const [delConfirm, setDelConfirm] = useState(null);
+
+  useEffect(() => {
+    try { const s = localStorage.getItem("prospeccao_v1"); if (s) setCreators(JSON.parse(s)); } catch {}
+    setLoading(false);
+  }, []);
+
+  const persist  = l => { try { localStorage.setItem("prospeccao_v1", JSON.stringify(l)); } catch {} };
+  const openAdd  = () => { setForm(EMPTY); setEditId(null); setModal(true); };
+  const openEdit = c  => { setForm({...c}); setEditId(c.id); setModal(true); };
+  const save = () => {
+    if (!form.nome.trim()) return;
+    const list = editId != null ? creators.map(c => c.id===editId ? {...form,id:editId} : c) : [...creators, {...form, id:Date.now()}];
+    setCreators(list); persist(list); setModal(false);
+  };
+  const del = id => {
+    const list = creators.filter(c => c.id !== id);
+    setCreators(list); persist(list); setDelConfirm(null);
+  };
+
+  const filtered = creators.filter(c =>
+    (!search || c.nome.toLowerCase().includes(search.toLowerCase()) || c.nicho?.toLowerCase().includes(search.toLowerCase())) &&
+    (!fSt || c.status === fSt) && (!fPl || c.plataforma === fPl)
+  );
+  const sc = STATUSES.reduce((a,s) => ({...a,[s]:creators.filter(c=>c.status===s).length}), {});
+
+  // ── MODAL ──
+  const modalEl = modal && r('div', {
+    style: { position:"fixed", inset:0, background:"rgba(0,0,0,0.85)", display:"flex", alignItems:"center", justifyContent:"center", zIndex:999, padding:16 },
+    onClick: e => e.target===e.currentTarget && setModal(false)
+  },
+    r('div', { style: { background:"#111", border:`1px solid ${C.border2}`, borderRadius:14, width:"100%", maxWidth:460, padding:28, ...sf, maxHeight:"90vh", overflowY:"auto" } },
+      r('h2', { style:{margin:"0 0 24px", fontSize:17, fontWeight:700, color:C.text} }, editId!=null ? "Editar criador" : "Novo criador"),
+      r('div', { style:{display:"flex", flexDirection:"column", gap:14} },
+        r('div', null,
+          r('div', {style:lSt}, "Nome / Canal *"),
+          r('input', { value:form.nome, onInput:e=>setForm(f=>({...f,nome:e.target.value})), placeholder:"ex: Felipe Neto", style:iSt })
+        ),
+        r('div', {style:{display:"flex",gap:12}},
+          r('div', {style:{flex:1}},
+            r('div',{style:lSt},"Plataforma"),
+            r('select',{value:form.plataforma, onChange:e=>setForm(f=>({...f,plataforma:e.target.value})), style:{...iSt,cursor:"pointer"}},
+              ...PLATFORMS.map(p=>r('option',{key:p,value:p},p))
+            )
+          ),
+          r('div', {style:{flex:1}},
+            r('div',{style:lSt},"Nicho"),
+            r('select',{value:form.nicho, onChange:e=>setForm(f=>({...f,nicho:e.target.value})), style:{...iSt,cursor:"pointer"}},
+              r('option',{value:""},"— Selecionar —"),
+              ...NICHES.map(n=>r('option',{key:n,value:n},n))
+            )
+          )
+        ),
+        r('div', {style:{display:"flex",gap:12}},
+          r('div', {style:{flex:1}},
+            r('div',{style:lSt},"Seguidores"),
+            r('input',{value:form.seguidores, onInput:e=>setForm(f=>({...f,seguidores:e.target.value})), placeholder:"ex: 1.2M", style:iSt})
+          ),
+          r('div', {style:{flex:1}},
+            r('div',{style:lSt},"Status"),
+            r('select',{value:form.status, onChange:e=>setForm(f=>({...f,status:e.target.value})), style:{...iSt,cursor:"pointer"}},
+              ...STATUSES.map(s=>r('option',{key:s,value:s},s))
+            )
+          )
+        ),
+        r('div', null,
+          r('div',{style:lSt},"Contato"),
+          r('input',{value:form.contato, onInput:e=>setForm(f=>({...f,contato:e.target.value})), placeholder:"e-mail, WhatsApp, @usuario...", style:iSt})
+        ),
+        r('div', null,
+          r('div',{style:lSt},"Observações"),
+          r('textarea',{onInput:e=>setForm(f=>({...f,observacoes:e.target.value})), placeholder:"Notas sobre esse criador...", rows:3, style:{...iSt,resize:"vertical"}}, form.observacoes)
+        )
+      ),
+      r('div', {style:{display:"flex",gap:10,marginTop:24,justifyContent:"flex-end"}},
+        r('button',{onClick:()=>setModal(false), style:{background:"transparent",border:`1px solid ${C.border2}`,borderRadius:8,color:C.muted,padding:"9px 20px",fontSize:13,cursor:"pointer",...sf}},"Cancelar"),
+        r('button',{onClick:save, style:{background:C.accent,border:"none",borderRadius:8,color:"#000",padding:"9px 26px",fontSize:13,fontWeight:700,cursor:"pointer",...sf}}, editId!=null?"Salvar":"Adicionar")
+      )
+    )
+  );
+
+  // ── CARDS ──
+  const cardEls = filtered.map(c => {
+    const pc = PLAT_COLOR[c.plataforma]||"#888";
+    const [statColor, statBg] = STAT[c.status]||STAT.Prospectando;
+    const isHov = hovered===c.id;
+    const isDel = delConfirm===c.id;
+
+    return r('div', {
+      key: c.id,
+      style: { background:isHov?C.hover:C.card, border:`1px solid ${isHov?C.border2:C.border}`, borderRadius:12, overflow:"hidden", transition:"transform 0.15s, background 0.15s, box-shadow 0.15s", transform:isHov?"translateY(-3px)":"none", boxShadow:isHov?"0 12px 40px rgba(0,0,0,0.5)":"none", display:"flex", flexDirection:"column" },
+      onMouseEnter: ()=>setHovered(c.id),
+      onMouseLeave: ()=>setHovered(null)
+    },
+      // top
+      r('div', {style:{padding:"18px 18px 14px", borderBottom:`1px solid ${C.border}`, position:"relative"}},
+        r('div', {style:{position:"absolute",top:0,left:0,right:0,height:2,background:`linear-gradient(90deg,${pc},transparent)`}}),
+        r('div', {style:{display:"flex",alignItems:"center",justifyContent:"space-between",marginBottom:12}},
+          r('div', {style:{width:44,height:44,borderRadius:10,background:`${pc}18`,border:`1px solid ${pc}30`,display:"flex",alignItems:"center",justifyContent:"center",fontSize:15,fontWeight:700,color:pc}},
+            initials(c.nome)||"?"
+          ),
+          r('span', {style:{background:`${pc}15`,color:pc,border:`1px solid ${pc}30`,borderRadius:6,padding:"3px 9px",fontSize:11,fontWeight:700}}, c.plataforma)
+        ),
+        r('div', {style:{fontWeight:700,fontSize:15,lineHeight:1.25,color:C.text}}, c.nome),
+        c.nicho && r('div', {style:{fontSize:12,color:C.sub,marginTop:3}}, c.nicho)
+      ),
+      // body
+      r('div', {style:{padding:"14px 18px",flex:1,display:"flex",flexDirection:"column",gap:12}},
+        r('div', {style:{display:"flex",alignItems:"flex-end",justifyContent:"space-between"}},
+          c.seguidores
+            ? r('div',null, r('div',{style:lSt},"Seguidores"), r('div',{style:{fontSize:16,fontWeight:700,marginTop:3,color:C.text}},c.seguidores))
+            : r('div',null),
+          r('span',{style:{background:statBg,color:statColor,border:`1px solid ${statColor}30`,borderRadius:6,padding:"4px 10px",fontSize:11,fontWeight:700}}, c.status)
+        ),
+        c.contato && r('div',null,
+          r('div',{style:lSt},"Contato"),
+          r('div',{style:{fontSize:12,marginTop:4,color:C.sub,wordBreak:"break-all",lineHeight:1.4}}, c.contato)
+        ),
+        c.observacoes && r('div',{style:{background:"#0A0A0A",border:`1px solid ${C.border}`,borderRadius:8,padding:"9px 11px"}},
+          r('div',{style:lSt},"Obs."),
+          r('div',{style:{fontSize:12,color:C.muted,marginTop:4,lineHeight:1.55,display:"-webkit-box",WebkitLineClamp:3,WebkitBoxOrient:"vertical",overflow:"hidden"}}, c.observacoes)
+        )
+      ),
+      // footer
+      r('div', {style:{borderTop:`1px solid ${C.border}`,padding:"10px 18px",display:"flex",gap:6,background:isHov?"#161616":C.card,transition:"background 0.15s"}},
+        isDel
+          ? [
+              r('span',{key:"q",style:{fontSize:12,color:C.muted,alignSelf:"center",marginRight:"auto"}},"Tem certeza?"),
+              r('button',{key:"y",onClick:()=>del(c.id),style:{background:"rgba(255,68,68,0.12)",border:"1px solid rgba(255,68,68,0.3)",borderRadius:6,color:C.red,cursor:"pointer",padding:"5px 14px",fontSize:12,fontWeight:700,...sf}},"Remover"),
+              r('button',{key:"n",onClick:()=>setDelConfirm(null),style:{background:"transparent",border:`1px solid ${C.border}`,borderRadius:6,color:C.muted,cursor:"pointer",padding:"5px 10px",fontSize:12,...sf}},"Cancelar")
+            ]
+          : [
+              r('button',{key:"e",onClick:()=>openEdit(c),style:{flex:1,background:"transparent",border:`1px solid ${C.border2}`,borderRadius:6,color:C.sub,cursor:"pointer",padding:"6px 0",fontSize:12,fontWeight:500,...sf}},"Editar"),
+              r('button',{key:"d",onClick:()=>setDelConfirm(c.id),style:{background:"transparent",border:`1px solid ${C.border}`,borderRadius:6,color:C.muted,cursor:"pointer",padding:"6px 12px",fontSize:12,...sf}},"✕")
+            ]
+      )
+    );
+  });
+
+  // ── ROOT ──
+  return r('div', {style:{minHeight:"100vh",background:C.bg,color:C.text,...sf}},
+
+    // header
+    r('div', {style:{borderBottom:`1px solid ${C.border}`,padding:"24px 28px 20px",background:C.surface}},
+      r('div', {style:{display:"flex",justifyContent:"space-between",alignItems:"flex-start"}},
+        r('div', null,
+          r('div',{style:{fontSize:11,fontWeight:600,color:C.muted,letterSpacing:"1.5px",textTransform:"uppercase",marginBottom:6}},"Editor de Vídeo"),
+          r('h1',{style:{margin:0,fontSize:22,fontWeight:700,color:C.text,letterSpacing:"-0.5px"}},"Prospecção")
+        ),
+        r('button',{onClick:openAdd,style:{background:C.accent,color:"#000",border:"none",borderRadius:8,padding:"9px 20px",fontSize:13,fontWeight:700,cursor:"pointer",...sf}},"+ Adicionar")
+      ),
+      creators.length > 0 && r('div', {style:{display:"flex",gap:20,marginTop:18,paddingTop:18,borderTop:`1px solid ${C.border}`,flexWrap:"wrap"}},
+        r('div',null, r('div',{style:lSt},"Total"), r('div',{style:{fontSize:20,fontWeight:700,marginTop:4}},creators.length)),
+        ...STATUSES.filter(s=>sc[s]>0).map(s => {
+          const [col] = STAT[s]; const active = fSt===s;
+          return r('div',{key:s,onClick:()=>setFSt(active?"":s),style:{cursor:"pointer",opacity:fSt&&!active?0.35:1,transition:"opacity 0.15s"}},
+            r('div',{style:{...lSt,color:active?col:C.muted}},s),
+            r('div',{style:{fontSize:20,fontWeight:700,marginTop:4,color:active?col:C.text}},sc[s])
+          );
+        })
+      ),
+      r('div',{style:{display:"flex",gap:8,marginTop:16,flexWrap:"wrap"}},
+        r('input',{value:search, onInput:e=>setSearch(e.target.value), placeholder:"Buscar por nome ou nicho...", style:{flex:1,minWidth:160,background:C.bg,border:`1px solid ${C.border2}`,borderRadius:8,padding:"8px 13px",color:C.text,fontSize:13,...sf,outline:"none"}}),
+        r('select',{value:fPl,onChange:e=>setFPl(e.target.value),style:{background:C.bg,border:`1px solid ${C.border2}`,borderRadius:8,padding:"8px 13px",color:fPl?C.text:C.muted,fontSize:13,...sf,cursor:"pointer",outline:"none"}},
+          r('option',{value:""},"Todas as plataformas"),
+          ...PLATFORMS.map(p=>r('option',{key:p,value:p},p))
+        )
+      )
+    ),
+
+    // grid
+    r('div',{style:{padding:"22px 28px"}},
+      loading
+        ? r('p',{style:{textAlign:"center",color:C.muted,padding:"40px 0"}},"Carregando...")
+        : filtered.length===0
+        ? r('div',{style:{textAlign:"center",padding:"70px 0"}},
+            r('div',{style:{fontSize:38,marginBottom:14}},"🎯"),
+            r('p',{style:{color:C.muted,fontSize:14}}, creators.length===0?"Nenhum criador ainda. Clique em + Adicionar para começar.":"Nenhum resultado para os filtros aplicados.")
+          )
+        : r('div',{style:{display:"grid",gridTemplateColumns:"repeat(auto-fill, minmax(260px, 1fr))",gap:12}}, ...cardEls)
+    ),
+
+    modalEl
+  );
+}
+
+ReactDOM.createRoot(document.getElementById('root')).render(React.createElement(App));
+</script>
+</body>
+</html>
