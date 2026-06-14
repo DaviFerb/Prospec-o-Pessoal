@@ -62,6 +62,7 @@ function App() {
   const [search,     setSearch]     = useState("");
   const [fSt,        setFSt]        = useState("");
   const [fPl,        setFPl]        = useState("");
+  const [fNi,        setFNi]        = useState("");
   const [hovered,    setHovered]    = useState(null);
   const [delConfirm, setDelConfirm] = useState(null);
 
@@ -84,8 +85,8 @@ function App() {
   };
 
   const filtered = creators.filter(c =>
-    (!search || c.nome.toLowerCase().includes(search.toLowerCase()) || c.nicho?.toLowerCase().includes(search.toLowerCase())) &&
-    (!fSt || c.status === fSt) && (!fPl || c.plataforma === fPl)
+    (!search || c.nome.toLowerCase().includes(search.toLowerCase())) &&
+    (!fSt || c.status === fSt) && (!fPl || c.plataforma === fPl) && (!fNi || c.nicho === fNi)
   );
   const sc = STATUSES.reduce((a,s) => ({...a,[s]:creators.filter(c=>c.status===s).length}), {});
 
@@ -239,10 +240,14 @@ function App() {
         })
       ),
       r('div',{style:{display:"flex",gap:8,marginTop:16,flexWrap:"wrap"}},
-        r('input',{value:search, onInput:e=>setSearch(e.target.value), placeholder:"Buscar por nome ou nicho...", style:{flex:1,minWidth:160,background:C.bg,border:`1px solid ${C.border2}`,borderRadius:8,padding:"8px 13px",color:C.text,fontSize:13,...sf,outline:"none"}}),
+        r('input',{value:search, onInput:e=>setSearch(e.target.value), placeholder:"Buscar por nome...", style:{flex:1,minWidth:160,background:C.bg,border:`1px solid ${C.border2}`,borderRadius:8,padding:"8px 13px",color:C.text,fontSize:13,...sf,outline:"none"}}),
         r('select',{value:fPl,onChange:e=>setFPl(e.target.value),style:{background:C.bg,border:`1px solid ${C.border2}`,borderRadius:8,padding:"8px 13px",color:fPl?C.text:C.muted,fontSize:13,...sf,cursor:"pointer",outline:"none"}},
           r('option',{value:""},"Todas as plataformas"),
           ...PLATFORMS.map(p=>r('option',{key:p,value:p},p))
+        ),
+        r('select',{value:fNi,onChange:e=>setFNi(e.target.value),style:{background:C.bg,border:`1px solid ${C.border2}`,borderRadius:8,padding:"8px 13px",color:fNi?C.text:C.muted,fontSize:13,...sf,cursor:"pointer",outline:"none"}},
+          r('option',{value:""},"Todos os nichos"),
+          ...NICHES.map(n=>r('option',{key:n,value:n},n))
         )
       )
     ),
