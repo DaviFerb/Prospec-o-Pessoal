@@ -1,12 +1,12 @@
 <!DOCTYPE html>
 <html lang="pt-BR">
 <head>
-  <meta charset="UTF-8" />
+  <meta charset="UTF-8"/>
   <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
-  <title>Prospecção</title>
+  <title>Dashboard — Editor</title>
   <script src="https://cdnjs.cloudflare.com/ajax/libs/react/18.2.0/umd/react.production.min.js"></script>
   <script src="https://cdnjs.cloudflare.com/ajax/libs/react-dom/18.2.0/umd/react-dom.production.min.js"></script>
-  <link rel="icon" type="image/svg+xml" href="data:image/svg+xml,%3Csvg%20xmlns%3D%22http%3A//www.w3.org/2000/svg%22%20viewBox%3D%220%200%2032%2032%22%3E%0A%20%20%3Crect%20width%3D%2232%22%20height%3D%2232%22%20rx%3D%227%22%20fill%3D%22%23111111%22/%3E%0A%20%20%3Ccircle%20cx%3D%2215%22%20cy%3D%2217%22%20r%3D%2210.5%22%20fill%3D%22none%22%20stroke%3D%22%23E83E6C%22%20stroke-width%3D%222%22/%3E%0A%20%20%3Ccircle%20cx%3D%2215%22%20cy%3D%2217%22%20r%3D%226%22%20fill%3D%22none%22%20stroke%3D%22%23E83E6C%22%20stroke-width%3D%222%22/%3E%0A%20%20%3Ccircle%20cx%3D%2215%22%20cy%3D%2217%22%20r%3D%222.5%22%20fill%3D%22%23E83E6C%22/%3E%0A%20%20%3Cline%20x1%3D%2222%22%20y1%3D%228%22%20x2%3D%2217%22%20y2%3D%2215%22%20stroke%3D%22%23FFFFFF%22%20stroke-width%3D%222.2%22%20stroke-linecap%3D%22round%22/%3E%0A%20%20%3Cpath%20d%3D%22M22%208%20L26%204%20M22%208%20L26%2012%22%20stroke%3D%22%23FFFFFF%22%20stroke-width%3D%221.8%22%20stroke-linecap%3D%22round%22/%3E%0A%3C/svg%3E"/>
+  <link rel="icon" type="image/svg+xml" href="data:image/svg+xml,%3Csvg%20xmlns%3D%22http%3A//www.w3.org/2000/svg%22%20viewBox%3D%220%200%2032%2032%22%3E%3Crect%20width%3D%2232%22%20height%3D%2232%22%20rx%3D%227%22%20fill%3D%22%23111111%22/%3E%3Ccircle%20cx%3D%2215%22%20cy%3D%2217%22%20r%3D%2210.5%22%20fill%3D%22none%22%20stroke%3D%22%23E83E6C%22%20stroke-width%3D%222%22/%3E%3Ccircle%20cx%3D%2215%22%20cy%3D%2217%22%20r%3D%226%22%20fill%3D%22none%22%20stroke%3D%22%23E83E6C%22%20stroke-width%3D%222%22/%3E%3Ccircle%20cx%3D%2215%22%20cy%3D%2217%22%20r%3D%222.5%22%20fill%3D%22%23E83E6C%22/%3E%3Cline%20x1%3D%2222%22%20y1%3D%228%22%20x2%3D%2217%22%20y2%3D%2215%22%20stroke%3D%22%23FFFFFF%22%20stroke-width%3D%222.2%22%20stroke-linecap%3D%22round%22/%3E%3Cpath%20d%3D%22M22%208%20L26%204%20M22%208%20L26%2012%22%20stroke%3D%22%23FFFFFF%22%20stroke-width%3D%221.8%22%20stroke-linecap%3D%22round%22/%3E%3C/svg%3E"/>
   <link href="https://fonts.googleapis.com/css2?family=Space+Grotesk:wght@400;500;600;700&display=swap" rel="stylesheet"/>
   <style>
     *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
@@ -23,6 +23,7 @@
 const { useState, useEffect } = React;
 const r = React.createElement;
 
+// ── CONSTANTS ──────────────────────────────────────────────
 const PLATFORMS = ["YouTube","Instagram","TikTok","Twitter/X","Twitch","LinkedIn","Outro"];
 const PLAT_COLOR = { YouTube:"#FF4444", Instagram:"#C13584", TikTok:"#00C2CB", "Twitter/X":"#aaa", Twitch:"#9146FF", LinkedIn:"#0A66C2", Outro:"#666" };
 const PLAT_ICON = {
@@ -43,232 +44,411 @@ const STAT = {
   Descartado:      ["#555","rgba(85,85,85,0.10)"],
 };
 const NICHES = ["Gaming","Lifestyle","Tech","Educação","Entretenimento","Fitness","Culinária","Finanças","Moda","Negócios","Música","Outro"];
-const EMPTY  = { nome:"", plataforma:"YouTube", nicho:"", seguidores:"", contato:"", link:"", status:"Prospectando", observacoes:"" };
+const EMPTY_C = { nome:"", plataforma:"YouTube", nicho:"", seguidores:"", contato:"", link:"", status:"Prospectando", observacoes:"" };
+const EMPTY_F = { cliente:"", valor:"", data: new Date().toISOString().split("T")[0], descricao:"", status:"Pago" };
 
-const C = { bg:"#080808", surface:"#101010", card:"#131313", hover:"#1A1A1A", border:"#222", border2:"#2A2A2A", accent:"#FFF", text:"#F0F0F0", sub:"#AAAAAA", muted:"#555", red:"#FF4444" };
+const C = { bg:"#080808", surface:"#101010", card:"#131313", hover:"#1A1A1A", border:"#222", border2:"#2A2A2A", accent:"#FFF", text:"#F0F0F0", sub:"#AAAAAA", muted:"#555", red:"#FF4444", green:"#5DB87A", yellow:"#E0A020" };
 const FF = "'Space Grotesk', system-ui, sans-serif";
 const sf = { fontFamily: FF };
 const iSt = { display:"block", width:"100%", boxSizing:"border-box", background:"#0A0A0A", border:"1px solid #222", borderRadius:8, padding:"9px 12px", color:C.text, fontSize:14, marginTop:5, fontFamily:FF, outline:"none" };
 const lSt = { fontSize:10, fontWeight:600, color:C.muted, textTransform:"uppercase", letterSpacing:"0.8px" };
 
-function initials(n) { return n.trim().split(" ").slice(0,2).map(w=>w[0]?.toUpperCase()).join(""); }
+// ── HELPERS ────────────────────────────────────────────────
+const today    = () => new Date().toISOString().split("T")[0];
+const nowYM    = () => today().substring(0,7);
+const fmtBRL   = v => (parseFloat(v)||0).toLocaleString("pt-BR",{style:"currency",currency:"BRL"});
+const fmtMonth = ym => { const [y,m]=ym.split("-"); return ["Jan","Fev","Mar","Abr","Mai","Jun","Jul","Ago","Set","Out","Nov","Dez"][+m-1]+" "+y; };
+const groupByMonth = entries => {
+  const g = {};
+  entries.forEach(e => { const k=e.data.substring(0,7); if(!g[k])g[k]=[]; g[k].push(e); });
+  return Object.entries(g).sort((a,b)=>b[0].localeCompare(a[0]));
+};
 
+// ── APP ────────────────────────────────────────────────────
 function App() {
+  const [section,    setSection]    = useState("prospeccao");
+
+  // prospecção state
   const [creators,   setCreators]   = useState([]);
-  const [loading,    setLoading]    = useState(true);
-  const [modal,      setModal]      = useState(false);
-  const [editId,     setEditId]     = useState(null);
-  const [form,       setForm]       = useState(EMPTY);
-  const [search,     setSearch]     = useState("");
-  const [fSt,        setFSt]        = useState("");
-  const [fPl,        setFPl]        = useState("");
-  const [fNi,        setFNi]        = useState("");
-  const [hovered,    setHovered]    = useState(null);
-  const [delConfirm, setDelConfirm] = useState(null);
+  const [cModal,     setCModal]     = useState(false);
+  const [cEditId,    setCEditId]    = useState(null);
+  const [cForm,      setCForm]      = useState(EMPTY_C);
+  const [cSearch,    setCSearch]    = useState("");
+  const [cFSt,       setCFSt]       = useState("");
+  const [cFPl,       setCFPl]       = useState("");
+  const [cHovered,   setCHovered]   = useState(null);
+  const [cDelConf,   setCDelConf]   = useState(null);
+
+  // financeiro state
+  const [entries,    setEntries]    = useState([]);
+  const [fModal,     setFModal]     = useState(false);
+  const [fEditId,    setFEditId]    = useState(null);
+  const [fForm,      setFForm]      = useState(EMPTY_F);
+  const [fHovered,   setFHovered]   = useState(null);
+  const [fDelConf,   setFDelConf]   = useState(null);
+  const [meta,       setMeta]       = useState(0);
+  const [editingMeta,setEditingMeta]= useState(false);
+  const [metaInput,  setMetaInput]  = useState("");
+
+  const [loading, setLoading] = useState(true);
 
   useEffect(() => {
-    try { const s = localStorage.getItem("prospeccao_v1"); if (s) setCreators(JSON.parse(s)); } catch {}
+    try { const s=localStorage.getItem("prospeccao_v1"); if(s) setCreators(JSON.parse(s)); } catch {}
+    try { const s=localStorage.getItem("financeiro_v1");  if(s) setEntries(JSON.parse(s));  } catch {}
+    try { const s=localStorage.getItem("meta_mensal");    if(s) setMeta(parseFloat(s)||0);  } catch {}
     setLoading(false);
   }, []);
 
-  const persist  = l => { try { localStorage.setItem("prospeccao_v1", JSON.stringify(l)); } catch {} };
-  const openAdd  = () => { setForm(EMPTY); setEditId(null); setModal(true); };
-  const openEdit = c  => { setForm({...c}); setEditId(c.id); setModal(true); };
-  const save = () => {
-    if (!form.nome.trim()) return;
-    const list = editId != null ? creators.map(c => c.id===editId ? {...form,id:editId} : c) : [...creators, {...form, id:Date.now()}];
-    setCreators(list); persist(list); setModal(false);
-  };
-  const del = id => {
-    const list = creators.filter(c => c.id !== id);
-    setCreators(list); persist(list); setDelConfirm(null);
-  };
+  const saveC = l => { try { localStorage.setItem("prospeccao_v1", JSON.stringify(l)); } catch {} };
+  const saveF = l => { try { localStorage.setItem("financeiro_v1",  JSON.stringify(l)); } catch {} };
+  const saveM = v => { try { localStorage.setItem("meta_mensal", String(v)); } catch {} };
 
-  const filtered = creators.filter(c =>
-    (!search || c.nome.toLowerCase().includes(search.toLowerCase())) &&
-    (!fSt || c.status === fSt) && (!fPl || c.plataforma === fPl) && (!fNi || c.nicho === fNi)
-  );
-  const sc = STATUSES.reduce((a,s) => ({...a,[s]:creators.filter(c=>c.status===s).length}), {});
-
-  // ── MODAL ──
-  const modalEl = modal && r('div', {
-    style: { position:"fixed", inset:0, background:"rgba(0,0,0,0.85)", display:"flex", alignItems:"center", justifyContent:"center", zIndex:999, padding:16 },
-    onClick: e => e.target===e.currentTarget && setModal(false)
-  },
-    r('div', { style: { background:"#111", border:`1px solid ${C.border2}`, borderRadius:14, width:"100%", maxWidth:460, padding:28, ...sf, maxHeight:"90vh", overflowY:"auto" } },
-      r('h2', { style:{margin:"0 0 24px", fontSize:17, fontWeight:700, color:C.text} }, editId!=null ? "Editar criador" : "Novo criador"),
-      r('div', { style:{display:"flex", flexDirection:"column", gap:14} },
-        r('div', null,
-          r('div', {style:lSt}, "Nome / Canal *"),
-          r('input', { value:form.nome, onInput:e=>setForm(f=>({...f,nome:e.target.value})), placeholder:"ex: Felipe Neto", style:iSt })
-        ),
-        r('div', {style:{display:"flex",gap:12}},
-          r('div', {style:{flex:1}},
-            r('div',{style:lSt},"Plataforma"),
-            r('select',{value:form.plataforma, onChange:e=>setForm(f=>({...f,plataforma:e.target.value})), style:{...iSt,cursor:"pointer"}},
-              ...PLATFORMS.map(p=>r('option',{key:p,value:p},p))
-            )
-          ),
-          r('div', {style:{flex:1}},
-            r('div',{style:lSt},"Nicho"),
-            r('select',{value:form.nicho, onChange:e=>setForm(f=>({...f,nicho:e.target.value})), style:{...iSt,cursor:"pointer"}},
-              r('option',{value:""},"— Selecionar —"),
-              ...NICHES.map(n=>r('option',{key:n,value:n},n))
-            )
-          )
-        ),
-        r('div', {style:{display:"flex",gap:12}},
-          r('div', {style:{flex:1}},
-            r('div',{style:lSt},"Seguidores"),
-            r('input',{value:form.seguidores, onInput:e=>setForm(f=>({...f,seguidores:e.target.value})), placeholder:"ex: 1.2M", style:iSt})
-          ),
-          r('div', {style:{flex:1}},
-            r('div',{style:lSt},"Status"),
-            r('select',{value:form.status, onChange:e=>setForm(f=>({...f,status:e.target.value})), style:{...iSt,cursor:"pointer"}},
-              ...STATUSES.map(s=>r('option',{key:s,value:s},s))
-            )
-          )
-        ),
-        r('div', null,
-          r('div',{style:lSt},"Contato"),
-          r('input',{value:form.contato, onInput:e=>setForm(f=>({...f,contato:e.target.value})), placeholder:"e-mail, WhatsApp, @usuario...", style:iSt})
-        ),
-        r('div', null,
-          r('div',{style:lSt},"Link do Perfil"),
-          r('input',{value:form.link, onInput:e=>setForm(f=>({...f,link:e.target.value})), placeholder:"https://youtube.com/@canal", style:iSt})
-        ),
-        r('div', null,
-          r('div',{style:lSt},"Observações"),
-          r('textarea',{onInput:e=>setForm(f=>({...f,observacoes:e.target.value})), placeholder:"Notas sobre esse criador...", rows:3, style:{...iSt,resize:"vertical"}}, form.observacoes)
-        )
-      ),
-      r('div', {style:{display:"flex",gap:10,marginTop:24,justifyContent:"flex-end"}},
-        r('button',{onClick:()=>setModal(false), style:{background:"transparent",border:`1px solid ${C.border2}`,borderRadius:8,color:C.muted,padding:"9px 20px",fontSize:13,cursor:"pointer",...sf}},"Cancelar"),
-        r('button',{onClick:save, style:{background:C.accent,border:"none",borderRadius:8,color:"#000",padding:"9px 26px",fontSize:13,fontWeight:700,cursor:"pointer",...sf}}, editId!=null?"Salvar":"Adicionar")
-      )
-    )
+  // ── NAV ──
+  const TABS = [
+    { id:"prospeccao", label:"Prospecção" },
+    { id:"financeiro", label:"Financeiro" },
+    { id:"visao",      label:"Visão Geral" },
+  ];
+  const nav = r("div", { style:{ background:C.surface, borderBottom:`1px solid ${C.border}`, padding:"0 28px", display:"flex", alignItems:"center", gap:4 } },
+    ...TABS.map(t => {
+      const active = section === t.id;
+      return r("button", {
+        key: t.id,
+        onClick: () => setSection(t.id),
+        style: {
+          background:"transparent", border:"none", cursor:"pointer",
+          padding:"16px 14px 14px", fontSize:14, fontWeight: active ? 600 : 500,
+          color: active ? C.text : C.muted,
+          borderBottom: active ? `2px solid ${C.accent}` : "2px solid transparent",
+          transition:"color 0.15s, border-color 0.15s", ...sf,
+        }
+      }, t.label);
+    })
   );
 
-  // ── CARDS ──
-  const cardEls = filtered.map(c => {
-    const pc = PLAT_COLOR[c.plataforma]||"#888";
-    const [statColor, statBg] = STAT[c.status]||STAT.Prospectando;
-    const isHov = hovered===c.id;
-    const isDel = delConfirm===c.id;
+  // ══════════════════════════════════════════════════════════
+  // PROSPECÇÃO
+  // ══════════════════════════════════════════════════════════
+  const openCAdd  = () => { setCForm(EMPTY_C); setCEditId(null); setCModal(true); };
+  const openCEdit = c  => { setCForm({...c}); setCEditId(c.id); setCModal(true); };
+  const saveC2 = () => {
+    if (!cForm.nome.trim()) return;
+    const list = cEditId!=null ? creators.map(c=>c.id===cEditId?{...cForm,id:cEditId}:c) : [...creators,{...cForm,id:Date.now()}];
+    setCreators(list); saveC(list); setCModal(false);
+  };
+  const delC = id => { const l=creators.filter(c=>c.id!==id); setCreators(l); saveC(l); setCDelConf(null); };
 
-    return r('div', {
-      key: c.id,
-      style: { background:isHov?C.hover:C.card, border:`1px solid ${isHov?C.border2:C.border}`, borderRadius:12, overflow:"hidden", transition:"transform 0.15s, background 0.15s, box-shadow 0.15s", transform:isHov?"translateY(-3px)":"none", boxShadow:isHov?"0 12px 40px rgba(0,0,0,0.5)":"none", display:"flex", flexDirection:"column" },
-      onMouseEnter: ()=>setHovered(c.id),
-      onMouseLeave: ()=>setHovered(null)
-    },
-      // top
-      r('div', {style:{padding:"18px 18px 14px", borderBottom:`1px solid ${C.border}`, position:"relative"}},
-        r('div', {style:{position:"absolute",top:0,left:0,right:0,height:2,background:`linear-gradient(90deg,${pc},transparent)`}}),
-        r('div', {style:{display:"flex",alignItems:"center",justifyContent:"space-between",marginBottom:12}},
-          r('div', {style:{width:44,height:44,borderRadius:10,background:`${pc}18`,border:`1px solid ${pc}30`,display:"flex",alignItems:"center",justifyContent:"center"}},
-            r('svg', {viewBox:"0 0 24 24", width:22, height:22, fill:pc, style:{display:"block"}},
-              r('path', {d: PLAT_ICON[c.plataforma] || PLAT_ICON.Outro})
-            )
-          ),
-          r('span', {style:{background:`${pc}15`,color:pc,border:`1px solid ${pc}30`,borderRadius:6,padding:"3px 9px",fontSize:11,fontWeight:700}}, c.plataforma)
-        ),
-        r('div', {style:{fontWeight:700,fontSize:15,lineHeight:1.25,color:C.text}}, c.nome),
-        c.nicho && r('div', {style:{fontSize:12,color:C.sub,marginTop:3}}, c.nicho)
-      ),
-      // body
-      r('div', {style:{padding:"14px 18px",flex:1,display:"flex",flexDirection:"column",gap:12}},
-        r('div', {style:{display:"flex",alignItems:"flex-end",justifyContent:"space-between"}},
-          c.seguidores
-            ? r('div',null, r('div',{style:lSt},"Seguidores"), r('div',{style:{fontSize:16,fontWeight:700,marginTop:3,color:C.text}},c.seguidores))
-            : r('div',null),
-          r('span',{style:{background:statBg,color:statColor,border:`1px solid ${statColor}30`,borderRadius:6,padding:"4px 10px",fontSize:11,fontWeight:700}}, c.status)
-        ),
-        c.contato && r('div',null,
-          r('div',{style:lSt},"Contato"),
-          r('div',{style:{fontSize:12,marginTop:4,color:C.sub,wordBreak:"break-all",lineHeight:1.4}}, c.contato)
-        ),
-        c.link && r('a', {href: c.link, target:"_blank", rel:"noopener noreferrer", style:{display:"flex",alignItems:"center",gap:6,marginTop:2,textDecoration:"none"}},
-          r('svg',{viewBox:"0 0 24 24",width:12,height:12,fill:"none",stroke:C.sub,strokeWidth:2,strokeLinecap:"round",strokeLinejoin:"round",style:{flexShrink:0}},
-            r('path',{d:"M18 13v6a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2V8a2 2 0 0 1 2-2h6"}),
-            r('polyline',{points:"15 3 21 3 21 9"}),
-            r('line',{x1:"10",y1:"14",x2:"21",y2:"3"})
-          ),
-          r('span',{style:{fontSize:12,color:C.sub,overflow:"hidden",textOverflow:"ellipsis",whiteSpace:"nowrap"}}, c.link.replace(/^https?:\/\/(www\.)?/,""))
-        ),
-        c.observacoes && r('div',{style:{background:"#0A0A0A",border:`1px solid ${C.border}`,borderRadius:8,padding:"9px 11px"}},
-          r('div',{style:lSt},"Obs."),
-          r('div',{style:{fontSize:12,color:C.sub,marginTop:4,lineHeight:1.55,display:"-webkit-box",WebkitLineClamp:3,WebkitBoxOrient:"vertical",overflow:"hidden"}}, c.observacoes)
-        )
-      ),
-      // footer
-      r('div', {style:{borderTop:`1px solid ${C.border}`,padding:"10px 18px",display:"flex",gap:6,background:isHov?"#161616":C.card,transition:"background 0.15s"}},
-        isDel
-          ? [
-              r('span',{key:"q",style:{fontSize:12,color:C.muted,alignSelf:"center",marginRight:"auto"}},"Tem certeza?"),
-              r('button',{key:"y",onClick:()=>del(c.id),style:{background:"rgba(255,68,68,0.12)",border:"1px solid rgba(255,68,68,0.3)",borderRadius:6,color:C.red,cursor:"pointer",padding:"5px 14px",fontSize:12,fontWeight:700,...sf}},"Remover"),
-              r('button',{key:"n",onClick:()=>setDelConfirm(null),style:{background:"transparent",border:`1px solid ${C.border}`,borderRadius:6,color:C.muted,cursor:"pointer",padding:"5px 10px",fontSize:12,...sf}},"Cancelar")
-            ]
-          : [
-              r('button',{key:"e",onClick:()=>openEdit(c),style:{flex:1,background:"transparent",border:`1px solid ${C.border2}`,borderRadius:6,color:C.sub,cursor:"pointer",padding:"6px 0",fontSize:12,fontWeight:500,...sf}},"Editar"),
-              r('button',{key:"d",onClick:()=>setDelConfirm(c.id),style:{background:"transparent",border:`1px solid ${C.border}`,borderRadius:6,color:C.muted,cursor:"pointer",padding:"6px 12px",fontSize:12,...sf}},"✕")
-            ]
-      )
-    );
-  });
+  const cFiltered = creators.filter(c =>
+    (!cSearch || c.nome.toLowerCase().includes(cSearch.toLowerCase()) || c.nicho?.toLowerCase().includes(cSearch.toLowerCase())) &&
+    (!cFSt || c.status===cFSt) && (!cFPl || c.plataforma===cFPl)
+  );
+  const cSC = STATUSES.reduce((a,s)=>({...a,[s]:creators.filter(c=>c.status===s).length}),{});
 
-  // ── ROOT ──
-  return r('div', {style:{minHeight:"100vh",background:C.bg,color:C.text,...sf}},
-
-    // header
-    r('div', {style:{borderBottom:`1px solid ${C.border}`,padding:"24px 28px 20px",background:C.surface}},
-      r('div', {style:{display:"flex",justifyContent:"space-between",alignItems:"flex-start"}},
-        r('div', null,
-          r('div',{style:{fontSize:11,fontWeight:600,color:C.muted,letterSpacing:"1.5px",textTransform:"uppercase",marginBottom:6}},"Editor de Vídeo"),
-          r('h1',{style:{margin:0,fontSize:22,fontWeight:700,color:C.text,letterSpacing:"-0.5px"}},"Prospecção")
+  function renderProspeccao() {
+    const header = r("div", { style:{ borderBottom:`1px solid ${C.border}`, padding:"20px 28px 18px" } },
+      r("div", { style:{ display:"flex", justifyContent:"space-between", alignItems:"flex-start" } },
+        r("div", null,
+          r("div", { style:{ fontSize:11, fontWeight:600, color:C.muted, letterSpacing:"1.5px", textTransform:"uppercase", marginBottom:4 } }, "Editor de Vídeo"),
+          r("h2", { style:{ margin:0, fontSize:20, fontWeight:700, color:C.text, letterSpacing:"-0.3px" } }, "Prospecção"),
+          r("p",  { style:{ margin:"3px 0 0", fontSize:13, color:C.muted } }, `${creators.length} criador${creators.length!==1?"es":""} cadastrado${creators.length!==1?"s":""}`)
         ),
-        r('button',{onClick:openAdd,style:{background:C.accent,color:"#000",border:"none",borderRadius:8,padding:"9px 20px",fontSize:13,fontWeight:700,cursor:"pointer",...sf}},"+ Adicionar")
+        r("button", { onClick:openCAdd, style:{ background:C.accent, color:"#000", border:"none", borderRadius:8, padding:"9px 20px", fontSize:13, fontWeight:700, cursor:"pointer", ...sf } }, "+ Adicionar")
       ),
-      creators.length > 0 && r('div', {style:{display:"flex",gap:20,marginTop:18,paddingTop:18,borderTop:`1px solid ${C.border}`,flexWrap:"wrap"}},
-        r('div',null, r('div',{style:lSt},"Total"), r('div',{style:{fontSize:20,fontWeight:700,marginTop:4}},creators.length)),
-        ...STATUSES.filter(s=>sc[s]>0).map(s => {
-          const [col] = STAT[s]; const active = fSt===s;
-          return r('div',{key:s,onClick:()=>setFSt(active?"":s),style:{cursor:"pointer",opacity:fSt&&!active?0.35:1,transition:"opacity 0.15s"}},
-            r('div',{style:{...lSt,color:active?col:C.muted}},s),
-            r('div',{style:{fontSize:20,fontWeight:700,marginTop:4,color:active?col:C.text}},sc[s])
+      creators.length>0 && r("div", { style:{ display:"flex", gap:20, marginTop:16, paddingTop:16, borderTop:`1px solid ${C.border}`, flexWrap:"wrap" } },
+        r("div",null, r("div",{style:lSt},"Total"), r("div",{style:{fontSize:18,fontWeight:700,marginTop:3}},creators.length)),
+        ...STATUSES.filter(s=>cSC[s]>0).map(s => {
+          const [col]=STAT[s]; const active=cFSt===s;
+          return r("div",{key:s,onClick:()=>setCFSt(active?"":s),style:{cursor:"pointer",opacity:cFSt&&!active?0.35:1,transition:"opacity 0.15s"}},
+            r("div",{style:{...lSt,color:active?col:C.muted}},s),
+            r("div",{style:{fontSize:18,fontWeight:700,marginTop:3,color:active?col:C.text}},cSC[s])
           );
         })
       ),
-      r('div',{style:{display:"flex",gap:8,marginTop:16,flexWrap:"wrap"}},
-        r('input',{value:search, onInput:e=>setSearch(e.target.value), placeholder:"Buscar por nome...", style:{flex:1,minWidth:160,background:C.bg,border:`1px solid ${C.border2}`,borderRadius:8,padding:"8px 13px",color:C.text,fontSize:13,...sf,outline:"none"}}),
-        r('select',{value:fPl,onChange:e=>setFPl(e.target.value),style:{background:C.bg,border:`1px solid ${C.border2}`,borderRadius:8,padding:"8px 13px",color:fPl?C.text:C.muted,fontSize:13,...sf,cursor:"pointer",outline:"none"}},
-          r('option',{value:""},"Todas as plataformas"),
-          ...PLATFORMS.map(p=>r('option',{key:p,value:p},p))
-        ),
-        r('select',{value:fNi,onChange:e=>setFNi(e.target.value),style:{background:C.bg,border:`1px solid ${C.border2}`,borderRadius:8,padding:"8px 13px",color:fNi?C.text:C.muted,fontSize:13,...sf,cursor:"pointer",outline:"none"}},
-          r('option',{value:""},"Todos os nichos"),
-          ...NICHES.map(n=>r('option',{key:n,value:n},n))
+      r("div",{style:{display:"flex",gap:8,marginTop:14,flexWrap:"wrap"}},
+        r("input",{value:cSearch, onInput:e=>setCSearch(e.target.value), placeholder:"Buscar por nome ou nicho...", style:{flex:1,minWidth:160,background:C.bg,border:`1px solid ${C.border2}`,borderRadius:8,padding:"8px 13px",color:C.text,fontSize:13,...sf,outline:"none"}}),
+        r("select",{value:cFPl,onChange:e=>setCFPl(e.target.value),style:{background:C.bg,border:`1px solid ${C.border2}`,borderRadius:8,padding:"8px 13px",color:cFPl?C.text:C.muted,fontSize:13,...sf,cursor:"pointer",outline:"none"}},
+          r("option",{value:""},"Todas as plataformas"),
+          ...PLATFORMS.map(p=>r("option",{key:p,value:p},p))
         )
       )
-    ),
+    );
 
-    // grid
-    r('div',{style:{padding:"22px 28px"}},
-      loading
-        ? r('p',{style:{textAlign:"center",color:C.muted,padding:"40px 0"}},"Carregando...")
-        : filtered.length===0
-        ? r('div',{style:{textAlign:"center",padding:"70px 0"}},
-            r('div',{style:{fontSize:38,marginBottom:14}},"🎯"),
-            r('p',{style:{color:C.muted,fontSize:14}}, creators.length===0?"Nenhum criador ainda. Clique em + Adicionar para começar.":"Nenhum resultado para os filtros aplicados.")
+    const cards = cFiltered.length===0
+      ? r("div",{style:{textAlign:"center",padding:"60px 0"}},
+          r("div",{style:{fontSize:36,marginBottom:12}},"🎯"),
+          r("p",{style:{color:C.muted,fontSize:14}},creators.length===0?"Nenhum criador ainda. Clique em + Adicionar.":"Nenhum resultado.")
+        )
+      : r("div",{style:{display:"grid",gridTemplateColumns:"repeat(auto-fill, minmax(260px, 1fr))",gap:12}},
+          ...cFiltered.map(c => {
+            const pc=PLAT_COLOR[c.plataforma]||"#888";
+            const [sc,sb]=STAT[c.status]||STAT.Prospectando;
+            const isHov=cHovered===c.id, isDel=cDelConf===c.id;
+            return r("div",{
+              key:c.id,
+              style:{background:isHov?C.hover:C.card,border:`1px solid ${isHov?C.border2:C.border}`,borderRadius:12,overflow:"hidden",transition:"transform 0.15s,background 0.15s,box-shadow 0.15s",transform:isHov?"translateY(-3px)":"none",boxShadow:isHov?"0 12px 40px rgba(0,0,0,0.5)":"none",display:"flex",flexDirection:"column"},
+              onMouseEnter:()=>setCHovered(c.id), onMouseLeave:()=>setCHovered(null)
+            },
+              r("div",{style:{padding:"18px 18px 14px",borderBottom:`1px solid ${C.border}`,position:"relative"}},
+                r("div",{style:{position:"absolute",top:0,left:0,right:0,height:2,background:`linear-gradient(90deg,${pc},transparent)`}}),
+                r("div",{style:{display:"flex",alignItems:"center",justifyContent:"space-between",marginBottom:12}},
+                  r("div",{style:{width:44,height:44,borderRadius:10,background:`${pc}18`,border:`1px solid ${pc}30`,display:"flex",alignItems:"center",justifyContent:"center"}},
+                    r("svg",{viewBox:"0 0 24 24",width:22,height:22,fill:pc,style:{display:"block"}}, r("path",{d:PLAT_ICON[c.plataforma]||PLAT_ICON.Outro}))
+                  ),
+                  r("span",{style:{background:`${pc}15`,color:pc,border:`1px solid ${pc}30`,borderRadius:6,padding:"3px 9px",fontSize:11,fontWeight:700}},c.plataforma)
+                ),
+                r("div",{style:{fontWeight:700,fontSize:15,lineHeight:1.25,color:C.text}},c.nome),
+                c.nicho && r("div",{style:{fontSize:12,color:C.sub,marginTop:3}},c.nicho)
+              ),
+              r("div",{style:{padding:"14px 18px",flex:1,display:"flex",flexDirection:"column",gap:10}},
+                r("div",{style:{display:"flex",alignItems:"flex-end",justifyContent:"space-between"}},
+                  c.seguidores ? r("div",null, r("div",{style:lSt},"Seguidores"), r("div",{style:{fontSize:15,fontWeight:700,marginTop:2,color:C.text}},c.seguidores)) : r("div",null),
+                  r("span",{style:{background:sb,color:sc,border:`1px solid ${sc}30`,borderRadius:6,padding:"4px 10px",fontSize:11,fontWeight:700}},c.status)
+                ),
+                c.contato && r("div",null, r("div",{style:lSt},"Contato"), r("div",{style:{fontSize:12,marginTop:3,color:C.sub,wordBreak:"break-all"}},c.contato)),
+                c.link && r("a",{href:c.link,target:"_blank",rel:"noopener noreferrer",style:{display:"flex",alignItems:"center",gap:6,textDecoration:"none"}},
+                  r("svg",{viewBox:"0 0 24 24",width:12,height:12,fill:"none",stroke:C.sub,strokeWidth:2,strokeLinecap:"round",strokeLinejoin:"round",style:{flexShrink:0}},
+                    r("path",{d:"M18 13v6a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2V8a2 2 0 0 1 2-2h6"}),
+                    r("polyline",{points:"15 3 21 3 21 9"}),
+                    r("line",{x1:"10",y1:"14",x2:"21",y2:"3"})
+                  ),
+                  r("span",{style:{fontSize:12,color:C.sub,overflow:"hidden",textOverflow:"ellipsis",whiteSpace:"nowrap"}},c.link.replace(/^https?:\/\/(www\.)?/,""))
+                ),
+                c.observacoes && r("div",{style:{background:"#0A0A0A",border:`1px solid ${C.border}`,borderRadius:8,padding:"9px 11px"}},
+                  r("div",{style:lSt},"Obs."),
+                  r("div",{style:{fontSize:12,color:C.sub,marginTop:3,lineHeight:1.5,display:"-webkit-box",WebkitLineClamp:3,WebkitBoxOrient:"vertical",overflow:"hidden"}},c.observacoes)
+                )
+              ),
+              r("div",{style:{borderTop:`1px solid ${C.border}`,padding:"10px 18px",display:"flex",gap:6,background:isHov?"#161616":C.card,transition:"background 0.15s"}},
+                isDel
+                  ? [r("span",{key:"q",style:{fontSize:12,color:C.muted,alignSelf:"center",marginRight:"auto"}},"Tem certeza?"),
+                     r("button",{key:"y",onClick:()=>delC(c.id),style:{background:"rgba(255,68,68,0.12)",border:"1px solid rgba(255,68,68,0.3)",borderRadius:6,color:C.red,cursor:"pointer",padding:"5px 14px",fontSize:12,fontWeight:700,...sf}},"Remover"),
+                     r("button",{key:"n",onClick:()=>setCDelConf(null),style:{background:"transparent",border:`1px solid ${C.border}`,borderRadius:6,color:C.muted,cursor:"pointer",padding:"5px 10px",fontSize:12,...sf}},"Cancelar")]
+                  : [r("button",{key:"e",onClick:()=>openCEdit(c),style:{flex:1,background:"transparent",border:`1px solid ${C.border2}`,borderRadius:6,color:C.sub,cursor:"pointer",padding:"6px 0",fontSize:12,fontWeight:500,...sf}},"Editar"),
+                     r("button",{key:"d",onClick:()=>setCDelConf(c.id),style:{background:"transparent",border:`1px solid ${C.border}`,borderRadius:6,color:C.muted,cursor:"pointer",padding:"6px 12px",fontSize:12,...sf}},"✕")]
+              )
+            );
+          })
+        );
+
+    const modal = cModal && r("div",{style:{position:"fixed",inset:0,background:"rgba(0,0,0,0.85)",display:"flex",alignItems:"center",justifyContent:"center",zIndex:999,padding:16},onClick:e=>e.target===e.currentTarget&&setCModal(false)},
+      r("div",{style:{background:"#111",border:`1px solid ${C.border2}`,borderRadius:14,width:"100%",maxWidth:460,padding:28,...sf,maxHeight:"90vh",overflowY:"auto"}},
+        r("h2",{style:{margin:"0 0 22px",fontSize:17,fontWeight:700,color:C.text}},cEditId!=null?"Editar criador":"Novo criador"),
+        r("div",{style:{display:"flex",flexDirection:"column",gap:13}},
+          r("div",null, r("div",{style:lSt},"Nome / Canal *"), r("input",{value:cForm.nome,onInput:e=>setCForm(f=>({...f,nome:e.target.value})),placeholder:"ex: Felipe Neto",style:iSt})),
+          r("div",{style:{display:"flex",gap:12}},
+            r("div",{style:{flex:1}}, r("div",{style:lSt},"Plataforma"), r("select",{value:cForm.plataforma,onChange:e=>setCForm(f=>({...f,plataforma:e.target.value})),style:{...iSt,cursor:"pointer"}}, ...PLATFORMS.map(p=>r("option",{key:p,value:p},p)))),
+            r("div",{style:{flex:1}}, r("div",{style:lSt},"Nicho"), r("select",{value:cForm.nicho,onChange:e=>setCForm(f=>({...f,nicho:e.target.value})),style:{...iSt,cursor:"pointer"}}, r("option",{value:""},"— Selecionar —"), ...NICHES.map(n=>r("option",{key:n,value:n},n))))
+          ),
+          r("div",{style:{display:"flex",gap:12}},
+            r("div",{style:{flex:1}}, r("div",{style:lSt},"Seguidores"), r("input",{value:cForm.seguidores,onInput:e=>setCForm(f=>({...f,seguidores:e.target.value})),placeholder:"ex: 1.2M",style:iSt})),
+            r("div",{style:{flex:1}}, r("div",{style:lSt},"Status"), r("select",{value:cForm.status,onChange:e=>setCForm(f=>({...f,status:e.target.value})),style:{...iSt,cursor:"pointer"}}, ...STATUSES.map(s=>r("option",{key:s,value:s},s))))
+          ),
+          r("div",null, r("div",{style:lSt},"Contato"), r("input",{value:cForm.contato,onInput:e=>setCForm(f=>({...f,contato:e.target.value})),placeholder:"e-mail, WhatsApp, @usuario...",style:iSt})),
+          r("div",null, r("div",{style:lSt},"Link do Perfil"), r("input",{value:cForm.link,onInput:e=>setCForm(f=>({...f,link:e.target.value})),placeholder:"https://youtube.com/@canal",style:iSt})),
+          r("div",null, r("div",{style:lSt},"Observações"), r("textarea",{onInput:e=>setCForm(f=>({...f,observacoes:e.target.value})),placeholder:"Notas sobre esse criador...",rows:3,style:{...iSt,resize:"vertical"}},cForm.observacoes))
+        ),
+        r("div",{style:{display:"flex",gap:10,marginTop:22,justifyContent:"flex-end"}},
+          r("button",{onClick:()=>setCModal(false),style:{background:"transparent",border:`1px solid ${C.border2}`,borderRadius:8,color:C.muted,padding:"9px 20px",fontSize:13,cursor:"pointer",...sf}},"Cancelar"),
+          r("button",{onClick:saveC2,style:{background:C.accent,border:"none",borderRadius:8,color:"#000",padding:"9px 26px",fontSize:13,fontWeight:700,cursor:"pointer",...sf}},cEditId!=null?"Salvar":"Adicionar")
+        )
+      )
+    );
+
+    return r("div",null, header, r("div",{style:{padding:"20px 28px"}},cards), modal);
+  }
+
+  // ══════════════════════════════════════════════════════════
+  // FINANCEIRO
+  // ══════════════════════════════════════════════════════════
+  const openFAdd  = () => { setFForm({...EMPTY_F,data:today()}); setFEditId(null); setFModal(true); };
+  const openFEdit = e  => { setFForm({...e}); setFEditId(e.id); setFModal(true); };
+  const saveF2 = () => {
+    if (!fForm.cliente.trim()||!fForm.valor) return;
+    const list = fEditId!=null ? entries.map(e=>e.id===fEditId?{...fForm,id:fEditId}:e) : [...entries,{...fForm,id:Date.now()}];
+    setEntries(list); saveF(list); setFModal(false);
+  };
+  const delF = id => { const l=entries.filter(e=>e.id!==id); setEntries(l); saveF(l); setFDelConf(null); };
+
+  function renderFinanceiro() {
+    const groups  = groupByMonth(entries);
+    const totPago = entries.filter(e=>e.status==="Pago").reduce((s,e)=>s+(parseFloat(e.valor)||0),0);
+    const totPend = entries.filter(e=>e.status==="Pendente").reduce((s,e)=>s+(parseFloat(e.valor)||0),0);
+
+    const header = r("div",{style:{borderBottom:`1px solid ${C.border}`,padding:"20px 28px 18px"}},
+      r("div",{style:{display:"flex",justifyContent:"space-between",alignItems:"flex-start"}},
+        r("div",null,
+          r("div",{style:{fontSize:11,fontWeight:600,color:C.muted,letterSpacing:"1.5px",textTransform:"uppercase",marginBottom:4}},"Editor de Vídeo"),
+          r("h2",{style:{margin:0,fontSize:20,fontWeight:700,color:C.text,letterSpacing:"-0.3px"}},"Financeiro"),
+          r("p",{style:{margin:"3px 0 0",fontSize:13,color:C.muted}},`${entries.length} lançamento${entries.length!==1?"s":""}`)
+        ),
+        r("button",{onClick:openFAdd,style:{background:C.accent,color:"#000",border:"none",borderRadius:8,padding:"9px 20px",fontSize:13,fontWeight:700,cursor:"pointer",...sf}},"+ Lançamento")
+      ),
+      entries.length>0 && r("div",{style:{display:"flex",gap:20,marginTop:16,paddingTop:16,borderTop:`1px solid ${C.border}`,flexWrap:"wrap"}},
+        r("div",null, r("div",{style:lSt},"Total Recebido"), r("div",{style:{fontSize:18,fontWeight:700,marginTop:3,color:C.green}},fmtBRL(totPago))),
+        r("div",null, r("div",{style:{...lSt,color:C.muted}},"A Receber"), r("div",{style:{fontSize:18,fontWeight:700,marginTop:3,color:C.yellow}},fmtBRL(totPend)))
+      )
+    );
+
+    const list = groups.length===0
+      ? r("div",{style:{textAlign:"center",padding:"60px 0"}},
+          r("div",{style:{fontSize:36,marginBottom:12}},"💸"),
+          r("p",{style:{color:C.muted,fontSize:14}},"Nenhum lançamento ainda. Clique em + Lançamento.")
+        )
+      : r("div",{style:{display:"flex",flexDirection:"column",gap:24}},
+          ...groups.map(([ym,items]) => {
+            const subtotal = items.filter(e=>e.status==="Pago").reduce((s,e)=>s+(parseFloat(e.valor)||0),0);
+            const pendente = items.filter(e=>e.status==="Pendente").reduce((s,e)=>s+(parseFloat(e.valor)||0),0);
+            return r("div",{key:ym},
+              r("div",{style:{display:"flex",alignItems:"baseline",justifyContent:"space-between",marginBottom:10}},
+                r("div",{style:{fontSize:13,fontWeight:700,color:C.sub,letterSpacing:"0.3px"}},fmtMonth(ym)),
+                r("div",{style:{display:"flex",gap:16,alignItems:"baseline"}},
+                  pendente>0 && r("span",{style:{fontSize:12,color:C.yellow}},`${fmtBRL(pendente)} pendente`),
+                  r("span",{style:{fontSize:14,fontWeight:700,color:C.green}},fmtBRL(subtotal))
+                )
+              ),
+              r("div",{style:{display:"flex",flexDirection:"column",gap:6}},
+                ...items.sort((a,b)=>b.data.localeCompare(a.data)).map(e => {
+                  const isHov=fHovered===e.id, isDel=fDelConf===e.id;
+                  const isPago=e.status==="Pago";
+                  return r("div",{
+                    key:e.id,
+                    style:{background:isHov?C.hover:C.card,border:`1px solid ${isHov?C.border2:C.border}`,borderRadius:10,padding:"13px 16px",display:"flex",alignItems:"center",gap:12,transition:"background 0.12s",borderLeft:`3px solid ${isPago?C.green:C.yellow}`},
+                    onMouseEnter:()=>setFHovered(e.id), onMouseLeave:()=>setFHovered(null)
+                  },
+                    r("div",{style:{flex:1,minWidth:0}},
+                      r("div",{style:{fontWeight:600,fontSize:14,color:C.text,whiteSpace:"nowrap",overflow:"hidden",textOverflow:"ellipsis"}},e.cliente),
+                      e.descricao && r("div",{style:{fontSize:12,color:C.sub,marginTop:2}},e.descricao)
+                    ),
+                    r("div",{style:{fontSize:12,color:C.muted,whiteSpace:"nowrap"}},e.data.split("-").reverse().join("/")),
+                    r("span",{style:{background:isPago?"rgba(93,184,122,0.12)":"rgba(224,160,32,0.12)",color:isPago?C.green:C.yellow,border:`1px solid ${isPago?C.green:C.yellow}30`,borderRadius:6,padding:"3px 10px",fontSize:11,fontWeight:700,whiteSpace:"nowrap"}},e.status),
+                    r("div",{style:{fontSize:15,fontWeight:700,color:C.text,whiteSpace:"nowrap",minWidth:90,textAlign:"right"}},fmtBRL(e.valor)),
+                    r("div",{style:{display:"flex",gap:5,opacity:isHov?1:0,transition:"opacity 0.12s"}},
+                      isDel
+                        ? [r("button",{key:"y",onClick:()=>delF(e.id),style:{background:"rgba(255,68,68,0.12)",border:"1px solid rgba(255,68,68,0.3)",borderRadius:6,color:C.red,cursor:"pointer",padding:"4px 10px",fontSize:11,fontWeight:700,...sf}},"Remover"),
+                           r("button",{key:"n",onClick:()=>setFDelConf(null),style:{background:"transparent",border:`1px solid ${C.border}`,borderRadius:6,color:C.muted,cursor:"pointer",padding:"4px 8px",fontSize:11,...sf}},"✕")]
+                        : [r("button",{key:"e",onClick:()=>openFEdit(e),style:{background:"transparent",border:`1px solid ${C.border2}`,borderRadius:6,color:C.sub,cursor:"pointer",padding:"4px 10px",fontSize:11,...sf}},"Editar"),
+                           r("button",{key:"d",onClick:()=>setFDelConf(e.id),style:{background:"transparent",border:`1px solid ${C.border}`,borderRadius:6,color:C.muted,cursor:"pointer",padding:"4px 8px",fontSize:11,...sf}},"✕")]
+                    )
+                  );
+                })
+              )
+            );
+          })
+        );
+
+    const modal = fModal && r("div",{style:{position:"fixed",inset:0,background:"rgba(0,0,0,0.85)",display:"flex",alignItems:"center",justifyContent:"center",zIndex:999,padding:16},onClick:e=>e.target===e.currentTarget&&setFModal(false)},
+      r("div",{style:{background:"#111",border:`1px solid ${C.border2}`,borderRadius:14,width:"100%",maxWidth:440,padding:28,...sf}},
+        r("h2",{style:{margin:"0 0 22px",fontSize:17,fontWeight:700,color:C.text}},fEditId!=null?"Editar lançamento":"Novo lançamento"),
+        r("div",{style:{display:"flex",flexDirection:"column",gap:13}},
+          r("div",null, r("div",{style:lSt},"Cliente / Projeto *"), r("input",{value:fForm.cliente,onInput:e=>setFForm(f=>({...f,cliente:e.target.value})),placeholder:"ex: João Silva — Reels",style:iSt})),
+          r("div",{style:{display:"flex",gap:12}},
+            r("div",{style:{flex:1}}, r("div",{style:lSt},"Valor (R$) *"), r("input",{value:fForm.valor,onInput:e=>setFForm(f=>({...f,valor:e.target.value})),placeholder:"ex: 500",type:"number",min:"0",style:iSt})),
+            r("div",{style:{flex:1}}, r("div",{style:lSt},"Data"), r("input",{value:fForm.data,onInput:e=>setFForm(f=>({...f,data:e.target.value})),type:"date",style:iSt}))
+          ),
+          r("div",null, r("div",{style:lSt},"Descrição"), r("input",{value:fForm.descricao,onInput:e=>setFForm(f=>({...f,descricao:e.target.value})),placeholder:"ex: 10 Reels + 2 vídeos longos",style:iSt})),
+          r("div",null, r("div",{style:lSt},"Status"),
+            r("div",{style:{display:"flex",gap:8,marginTop:6}},
+              ...["Pago","Pendente"].map(s =>
+                r("button",{key:s,onClick:()=>setFForm(f=>({...f,status:s})),style:{
+                  flex:1,padding:"9px",borderRadius:8,cursor:"pointer",fontSize:13,fontWeight:600,...sf,
+                  border: fForm.status===s ? (s==="Pago"?`1px solid ${C.green}`:`1px solid ${C.yellow}`) : `1px solid ${C.border}`,
+                  background: fForm.status===s ? (s==="Pago"?"rgba(93,184,122,0.12)":"rgba(224,160,32,0.12)") : "transparent",
+                  color: fForm.status===s ? (s==="Pago"?C.green:C.yellow) : C.muted,
+                }},s)
+              )
+            )
           )
-        : r('div',{style:{display:"grid",gridTemplateColumns:"repeat(auto-fill, minmax(260px, 1fr))",gap:12}}, ...cardEls)
-    ),
+        ),
+        r("div",{style:{display:"flex",gap:10,marginTop:22,justifyContent:"flex-end"}},
+          r("button",{onClick:()=>setFModal(false),style:{background:"transparent",border:`1px solid ${C.border2}`,borderRadius:8,color:C.muted,padding:"9px 20px",fontSize:13,cursor:"pointer",...sf}},"Cancelar"),
+          r("button",{onClick:saveF2,style:{background:C.accent,border:"none",borderRadius:8,color:"#000",padding:"9px 26px",fontSize:13,fontWeight:700,cursor:"pointer",...sf}},fEditId!=null?"Salvar":"Adicionar")
+        )
+      )
+    );
 
-    modalEl
+    return r("div",null, header, r("div",{style:{padding:"20px 28px"}},list), modal);
+  }
+
+  // ══════════════════════════════════════════════════════════
+  // VISÃO GERAL
+  // ══════════════════════════════════════════════════════════
+  function renderVisao() {
+    const curYM   = nowYM();
+    const curYear = curYM.substring(0,4);
+    const mesMes  = entries.filter(e=>e.data.startsWith(curYM)&&e.status==="Pago").reduce((s,e)=>s+(parseFloat(e.valor)||0),0);
+    const anoTot  = entries.filter(e=>e.data.startsWith(curYear)&&e.status==="Pago").reduce((s,e)=>s+(parseFloat(e.valor)||0),0);
+    const aReceber= entries.filter(e=>e.status==="Pendente").reduce((s,e)=>s+(parseFloat(e.valor)||0),0);
+    const projMes = entries.filter(e=>e.data.startsWith(curYM)).length;
+    const progPct  = meta>0 ? Math.min(100, Math.round(mesMes/meta*100)) : 0;
+    const fechados = creators.filter(c=>c.status==="Fechado").length;
+    const ativos   = creators.filter(c=>["Contatado","Em negociação"].includes(c.status)).length;
+
+    const statCard = (label, value, color, sub) =>
+      r("div",{style:{background:C.card,border:`1px solid ${C.border}`,borderRadius:12,padding:"18px 20px",flex:1,minWidth:160}},
+        r("div",{style:{...lSt,marginBottom:8}},label),
+        r("div",{style:{fontSize:22,fontWeight:700,color:color||C.text,letterSpacing:"-0.5px"}},value),
+        sub && r("div",{style:{fontSize:12,color:C.muted,marginTop:4}},sub)
+      );
+
+    return r("div",null,
+      r("div",{style:{borderBottom:`1px solid ${C.border}`,padding:"20px 28px 18px"}},
+        r("div",{style:{fontSize:11,fontWeight:600,color:C.muted,letterSpacing:"1.5px",textTransform:"uppercase",marginBottom:4}},"Editor de Vídeo"),
+        r("h2",{style:{margin:0,fontSize:20,fontWeight:700,color:C.text,letterSpacing:"-0.3px"}},"Visão Geral")
+      ),
+      r("div",{style:{padding:"20px 28px",display:"flex",flexDirection:"column",gap:20}},
+
+        // stats row
+        r("div",{style:{display:"flex",gap:12,flexWrap:"wrap"}},
+          statCard("Este mês", fmtBRL(mesMes), C.green, `${projMes} projeto${projMes!==1?"s":""}`),
+          statCard("Este ano",  fmtBRL(anoTot), C.text),
+          statCard("A receber", fmtBRL(aReceber), C.yellow),
+        ),
+
+        r("div",{style:{display:"flex",gap:12,flexWrap:"wrap"}},
+          statCard("Clientes fechados", fechados, C.text, "no pipeline"),
+          statCard("Em negociação",     ativos,   C.sub,  "contatados + negociando"),
+          statCard("Prospecções ativas",creators.filter(c=>c.status==="Prospectando").length, C.muted),
+        ),
+
+        // meta mensal
+        r("div",{style:{background:C.card,border:`1px solid ${C.border}`,borderRadius:12,padding:"20px"}},
+          r("div",{style:{display:"flex",alignItems:"center",justifyContent:"space-between",marginBottom:16}},
+            r("div",null,
+              r("div",{style:{...lSt,marginBottom:4}},"Meta mensal"),
+              r("div",{style:{fontSize:13,color:C.sub}}, meta>0 ? `${fmtBRL(mesMes)} de ${fmtBRL(meta)} (${progPct}%)` : "Nenhuma meta definida")
+            ),
+            editingMeta
+              ? r("div",{style:{display:"flex",gap:8,alignItems:"center"}},
+                  r("input",{value:metaInput,onInput:e=>setMetaInput(e.target.value),placeholder:"ex: 3000",type:"number",min:"0",style:{...iSt,marginTop:0,width:120,padding:"7px 10px",fontSize:13}}),
+                  r("button",{onClick:()=>{const v=parseFloat(metaInput)||0;setMeta(v);saveM(v);setEditingMeta(false);},style:{background:C.accent,color:"#000",border:"none",borderRadius:7,padding:"7px 14px",fontSize:12,fontWeight:700,cursor:"pointer",...sf}},"Salvar"),
+                  r("button",{onClick:()=>setEditingMeta(false),style:{background:"transparent",border:`1px solid ${C.border}`,borderRadius:7,padding:"7px 10px",fontSize:12,color:C.muted,cursor:"pointer",...sf}},"✕")
+                )
+              : r("button",{onClick:()=>{setMetaInput(meta||"");setEditingMeta(true);},style:{background:"transparent",border:`1px solid ${C.border2}`,borderRadius:7,padding:"7px 14px",fontSize:12,color:C.sub,cursor:"pointer",...sf}},meta>0?"Editar meta":"Definir meta")
+          ),
+          meta>0 && r("div",null,
+            r("div",{style:{height:8,background:C.border,borderRadius:4,overflow:"hidden"}},
+              r("div",{style:{height:"100%",width:`${progPct}%`,background:progPct>=100?C.green:progPct>=60?"#9B8BFF":C.yellow,borderRadius:4,transition:"width 0.4s ease"}})
+            ),
+            r("div",{style:{display:"flex",justifyContent:"space-between",marginTop:6}},
+              r("span",{style:{fontSize:11,color:C.muted}},"R$ 0"),
+              r("span",{style:{fontSize:11,color:C.muted}},fmtBRL(meta))
+            )
+          )
+        )
+      )
+    );
+  }
+
+  // ── ROOT ──
+  return r("div",{style:{minHeight:"100vh",background:C.bg,color:C.text,...sf}},
+    nav,
+    !loading && section==="prospeccao" && renderProspeccao(),
+    !loading && section==="financeiro" && renderFinanceiro(),
+    !loading && section==="visao"      && renderVisao()
   );
 }
 
-ReactDOM.createRoot(document.getElementById('root')).render(React.createElement(App));
+ReactDOM.createRoot(document.getElementById("root")).render(r(App));
 </script>
 </body>
 </html>
