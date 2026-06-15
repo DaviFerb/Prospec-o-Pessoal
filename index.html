@@ -76,6 +76,7 @@ function App() {
   const [cSearch,    setCSearch]    = useState("");
   const [cFSt,       setCFSt]       = useState("");
   const [cFPl,       setCFPl]       = useState("");
+  const [cFNicho,    setCFNicho]    = useState("");
   const [cHovered,   setCHovered]   = useState(null);
   const [cDelConf,   setCDelConf]   = useState(null);
 
@@ -109,22 +110,47 @@ function App() {
     { id:"financeiro", label:"Financeiro" },
     { id:"visao",      label:"Visão Geral" },
   ];
-  const nav = r("div", { style:{ background:C.surface, borderBottom:`1px solid ${C.border}`, padding:"0 28px", display:"flex", alignItems:"center", gap:4 } },
-    ...TABS.map(t => {
-      const active = section === t.id;
-      return r("button", {
-        key: t.id,
-        onClick: () => setSection(t.id),
-        style: {
-          background:"transparent", border:"none", cursor:"pointer",
-          padding:"16px 14px 14px", fontSize:14, fontWeight: active ? 600 : 500,
-          color: active ? C.text : C.muted,
-          borderBottom: active ? `2px solid ${C.accent}` : "2px solid transparent",
-          transition:"color 0.15s, border-color 0.15s", ...sf,
-        }
-      }, t.label);
-    })
-  );
+  const [navOpen, setNavOpen] = useState(false);
+  const currentLabel = TABS.find(t=>t.id===section)?.label || "Prospecção";
+
+  function navTitle() {
+    return r("div", { style:{ position:"relative", display:"inline-block" } },
+      r("button", {
+        onClick: () => setNavOpen(o => !o),
+        style: { background:"transparent", border:"none", cursor:"pointer", padding:0, ...sf, display:"flex", alignItems:"center", gap:7, marginTop:2 }
+      },
+        r("span", { style:{ fontSize:20, fontWeight:700, color:C.text, letterSpacing:"-0.4px" } }, currentLabel),
+        r("svg", { viewBox:"0 0 24 24", width:15, height:15, fill:"none", stroke:C.muted, strokeWidth:2.5, strokeLinecap:"round", strokeLinejoin:"round",
+          style:{ transition:"transform 0.2s", transform: navOpen ? "rotate(180deg)" : "rotate(0deg)", marginTop:1 } },
+          r("polyline", { points:"6 9 12 15 18 9" })
+        )
+      ),
+      navOpen && r("div", {
+        style:{ position:"absolute", top:"calc(100% + 8px)", left:0, zIndex:200,
+          background:"#161618", border:`1px solid ${C.border2}`, borderRadius:10,
+          overflow:"hidden", minWidth:180, boxShadow:"0 8px 32px rgba(0,0,0,0.6)" }
+      },
+        ...TABS.map((t,i) => {
+          const active = section===t.id;
+          return r("button", {
+            key: t.id,
+            onClick: () => { setSection(t.id); setNavOpen(false); },
+            style: { display:"block", width:"100%", textAlign:"left", cursor:"pointer",
+              padding:"11px 16px", fontSize:14, fontWeight: active ? 600 : 400,
+              color: active ? C.text : C.sub,
+              background: active ? "rgba(255,255,255,0.05)" : "transparent",
+              border:"none", borderTop: i>0 ? `1px solid ${C.border}` : "none", ...sf }
+          },
+            r("div", { style:{ display:"flex", alignItems:"center", justifyContent:"space-between" } },
+              t.label,
+              active && r("div", { style:{ width:6, height:6, borderRadius:"50%", background:C.accent } })
+            )
+          );
+        })
+      ),
+      navOpen && r("div", { style:{ position:"fixed", inset:0, zIndex:199 }, onClick:()=>setNavOpen(false) })
+    );
+  }
 
   // ══════════════════════════════════════════════════════════
   // PROSPECÇÃO
@@ -140,7 +166,7 @@ function App() {
 
   const cFiltered = creators.filter(c =>
     (!cSearch || c.nome.toLowerCase().includes(cSearch.toLowerCase()) || c.nicho?.toLowerCase().includes(cSearch.toLowerCase())) &&
-    (!cFSt || c.status===cFSt) && (!cFPl || c.plataforma===cFPl)
+    (!cFSt || c.status===cFSt) && (!cFPl || c.plataforma===cFPl) && (!cFNicho || c.nicho===cFNicho)
   );
   const cSC = STATUSES.reduce((a,s)=>({...a,[s]:creators.filter(c=>c.status===s).length}),{});
 
@@ -149,7 +175,7 @@ function App() {
       r("div", { style:{ display:"flex", justifyContent:"space-between", alignItems:"flex-start" } },
         r("div", null,
           r("div", { style:{ fontSize:11, fontWeight:600, color:C.muted, letterSpacing:"1.5px", textTransform:"uppercase", marginBottom:4 } }, "Editor de Vídeo"),
-          r("h2", { style:{ margin:0, fontSize:20, fontWeight:700, color:C.text, letterSpacing:"-0.3px" } }, "Prospecção"),
+          navTitle(),
           r("p",  { style:{ margin:"3px 0 0", fontSize:13, color:C.muted } }, `${creators.length} criador${creators.length!==1?"es":""} cadastrado${creators.length!==1?"s":""}`)
         ),
         r("button", { onClick:openCAdd, style:{ background:C.accent, color:"#000", border:"none", borderRadius:8, padding:"9px 20px", fontSize:13, fontWeight:700, cursor:"pointer", ...sf } }, "+ Adicionar")
@@ -169,6 +195,10 @@ function App() {
         r("select",{value:cFPl,onChange:e=>setCFPl(e.target.value),style:{background:C.bg,border:`1px solid ${C.border2}`,borderRadius:8,padding:"8px 13px",color:cFPl?C.text:C.muted,fontSize:13,...sf,cursor:"pointer",outline:"none"}},
           r("option",{value:""},"Todas as plataformas"),
           ...PLATFORMS.map(p=>r("option",{key:p,value:p},p))
+        ),
+        r("select",{value:cFNicho,onChange:e=>setCFNicho(e.target.value),style:{background:C.bg,border:`1px solid ${C.border2}`,borderRadius:8,padding:"8px 13px",color:cFNicho?C.text:C.muted,fontSize:13,...sf,cursor:"pointer",outline:"none"}},
+          r("option",{value:""},"Todos os nichos"),
+          ...NICHES.map(n=>r("option",{key:n,value:n},n))
         )
       )
     );
@@ -278,7 +308,7 @@ function App() {
       r("div",{style:{display:"flex",justifyContent:"space-between",alignItems:"flex-start"}},
         r("div",null,
           r("div",{style:{fontSize:11,fontWeight:600,color:C.muted,letterSpacing:"1.5px",textTransform:"uppercase",marginBottom:4}},"Editor de Vídeo"),
-          r("h2",{style:{margin:0,fontSize:20,fontWeight:700,color:C.text,letterSpacing:"-0.3px"}},"Financeiro"),
+          navTitle(),
           r("p",{style:{margin:"3px 0 0",fontSize:13,color:C.muted}},`${entries.length} lançamento${entries.length!==1?"s":""}`)
         ),
         r("button",{onClick:openFAdd,style:{background:C.accent,color:"#000",border:"none",borderRadius:8,padding:"9px 20px",fontSize:13,fontWeight:700,cursor:"pointer",...sf}},"+ Lançamento")
@@ -393,7 +423,7 @@ function App() {
     return r("div",null,
       r("div",{style:{borderBottom:`1px solid ${C.border}`,padding:"20px 28px 18px"}},
         r("div",{style:{fontSize:11,fontWeight:600,color:C.muted,letterSpacing:"1.5px",textTransform:"uppercase",marginBottom:4}},"Editor de Vídeo"),
-        r("h2",{style:{margin:0,fontSize:20,fontWeight:700,color:C.text,letterSpacing:"-0.3px"}},"Visão Geral")
+        navTitle()
       ),
       r("div",{style:{padding:"20px 28px",display:"flex",flexDirection:"column",gap:20}},
 
@@ -441,7 +471,6 @@ function App() {
 
   // ── ROOT ──
   return r("div",{style:{minHeight:"100vh",background:C.bg,color:C.text,...sf}},
-    nav,
     !loading && section==="prospeccao" && renderProspeccao(),
     !loading && section==="financeiro" && renderFinanceiro(),
     !loading && section==="visao"      && renderVisao()
