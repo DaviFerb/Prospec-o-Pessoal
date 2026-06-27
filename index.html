@@ -44,8 +44,10 @@ const STAT = {
   Recusou:          ["#FF5555","rgba(255,85,85,0.12)"],
   "Sem resposta":   ["#444","rgba(68,68,68,0.12)"],
 };
+const PRIORITY = { Alta:["🟢","#5DB87A"], Média:["🟡","#E0A020"], Baixa:["🔴","#FF5555"] };
+const PRIORITY_KEYS = ["Alta","Média","Baixa"];
 const NICHES = ["Gaming","Lifestyle","Tech","Educação","Entretenimento","Fitness","Culinária","Finanças","Moda","Negócios","Música","Outro"];
-const EMPTY_C = { nome:"", plataforma:"YouTube", nicho:"", seguidores:"", contato:"", link:"", status:"Prospectando", observacoes:"" };
+const EMPTY_C = { nome:"", plataforma:"YouTube", nicho:"", seguidores:"", contato:"", link:"", status:"Prospectando", prioridade:"Média", dataContato:"", orcamento:"", observacoes:"" };
 const EMPTY_F = { cliente:"", valor:"", data: new Date().toISOString().split("T")[0], descricao:"", status:"Pago" };
 
 const C = { bg:"#080808", surface:"#101010", card:"#131313", hover:"#1A1A1A", border:"#222", border2:"#2A2A2A", accent:"#FFF", text:"#F0F0F0", sub:"#AAAAAA", muted:"#555", red:"#FF4444", green:"#5DB87A", yellow:"#E0A020" };
@@ -79,7 +81,9 @@ function App() {
   const [cFPl,       setCFPl]       = useState("");
   const [cFNicho,    setCFNicho]    = useState("");
   const [cHovered,   setCHovered]   = useState(null);
-  const [cDelConf,   setCDelConf]   = useState(null);
+  const [cDelConf,      setCDelConf]      = useState(null);
+  const [prospectarModal,setProspectarModal] = useState(false);
+  const [prospectarLote, setProspectarLote]  = useState([]);
 
   // financeiro state
   const [entries,    setEntries]    = useState([]);
@@ -157,6 +161,18 @@ function App() {
   // PROSPECÇÃO
   // ══════════════════════════════════════════════════════════
   const openCAdd  = () => { setCForm(EMPTY_C); setCEditId(null); setCModal(true); };
+
+  const openProspectar = () => {
+    const lote = creators.filter(c=>c.status==="Prospectando").slice(0,50);
+    setProspectarLote(lote);
+    setProspectarModal(true);
+  };
+
+  const finalizarLote = () => {
+    const ids = new Set(prospectarLote.map(c=>c.id));
+    const list = creators.map(c => ids.has(c.id) ? {...c, status:"Contato enviado"} : c);
+    setCreators(list); saveC(list); setProspectarModal(false);
+  };
   const openCEdit = c  => { setCForm({...c}); setCEditId(c.id); setCModal(true); };
   const saveC2 = () => {
     if (!cForm.nome.trim()) return;
@@ -179,7 +195,11 @@ function App() {
           navTitle(),
           r("p",  { style:{ margin:"3px 0 0", fontSize:13, color:C.muted } }, `${creators.length} criador${creators.length!==1?"es":""} cadastrado${creators.length!==1?"s":""}`)
         ),
-        r("button", { onClick:openCAdd, style:{ background:C.accent, color:"#000", border:"none", borderRadius:8, padding:"9px 20px", fontSize:13, fontWeight:700, cursor:"pointer", ...sf } }, "+ Adicionar")
+        r("div", { style:{ display:"flex", gap:8 } },
+          creators.filter(c=>c.status==="Prospectando").length > 0 &&
+            r("button", { onClick:openProspectar, style:{ background:"transparent", color:C.sub, border:`1px solid ${C.border2}`, borderRadius:8, padding:"9px 16px", fontSize:13, fontWeight:600, cursor:"pointer", ...sf } }, "🎯 Prospectar Hoje"),
+          r("button", { onClick:openCAdd, style:{ background:C.accent, color:"#000", border:"none", borderRadius:8, padding:"9px 20px", fontSize:13, fontWeight:700, cursor:"pointer", ...sf } }, "+ Adicionar")
+        )
       ),
       creators.length>0 && r("div", { style:{ display:"flex", gap:20, marginTop:16, paddingTop:16, borderTop:`1px solid ${C.border}`, flexWrap:"wrap" } },
         r("div",null, r("div",{style:lSt},"Total"), r("div",{style:{fontSize:18,fontWeight:700,marginTop:3}},creators.length)),
@@ -225,7 +245,16 @@ function App() {
                   r("div",{style:{width:44,height:44,borderRadius:10,background:`${pc}18`,border:`1px solid ${pc}30`,display:"flex",alignItems:"center",justifyContent:"center"}},
                     r("svg",{viewBox:"0 0 24 24",width:22,height:22,fill:pc,style:{display:"block"}}, r("path",{d:PLAT_ICON[c.plataforma]||PLAT_ICON.Outro}))
                   ),
-                  r("span",{style:{background:`${pc}15`,color:pc,border:`1px solid ${pc}30`,borderRadius:6,padding:"3px 9px",fontSize:11,fontWeight:700}},c.plataforma)
+                  r("div",{style:{display:"flex",gap:6,alignItems:"center"}},
+                    c.prioridade && r("span",{style:{
+                      fontSize:11, fontWeight:700,
+                      color: PRIORITY[c.prioridade]?.[1] || C.muted,
+                      background: `${PRIORITY[c.prioridade]?.[1]}15`,
+                      border: `1px solid ${PRIORITY[c.prioridade]?.[1]}35`,
+                      borderRadius:6, padding:"3px 9px",
+                    }}, `${PRIORITY[c.prioridade]?.[0]} ${c.prioridade}`),
+                    r("span",{style:{background:`${pc}15`,color:pc,border:`1px solid ${pc}30`,borderRadius:6,padding:"3px 9px",fontSize:11,fontWeight:700}},c.plataforma)
+                  )
                 ),
                 r("div",{style:{fontWeight:700,fontSize:15,lineHeight:1.25,color:C.text}},c.nome),
                 c.nicho && r("div",{style:{fontSize:12,color:C.sub,marginTop:3}},c.nicho)
@@ -243,6 +272,14 @@ function App() {
                     r("line",{x1:"10",y1:"14",x2:"21",y2:"3"})
                   ),
                   r("span",{style:{fontSize:12,color:C.sub,overflow:"hidden",textOverflow:"ellipsis",whiteSpace:"nowrap"}},c.link.replace(/^https?:\/\/(www\.)?/,""))
+                ),
+                c.dataContato && r("div",null,
+                  r("div",{style:lSt},"Primeiro contato"),
+                  r("div",{style:{fontSize:12,marginTop:3,color:C.sub}}, c.dataContato.split("-").reverse().join("/"))
+                ),
+                c.orcamento && r("div",null,
+                  r("div",{style:lSt},"Orçamento"),
+                  r("div",{style:{fontSize:15,fontWeight:700,marginTop:3,color:C.green}}, c.orcamento)
                 ),
                 c.observacoes && r("div",{style:{background:"#0A0A0A",border:`1px solid ${C.border}`,borderRadius:8,padding:"9px 11px"}},
                   r("div",{style:lSt},"Obs."),
@@ -271,11 +308,40 @@ function App() {
             r("div",{style:{flex:1}}, r("div",{style:lSt},"Nicho"), r("select",{value:cForm.nicho,onChange:e=>setCForm(f=>({...f,nicho:e.target.value})),style:{...iSt,cursor:"pointer"}}, r("option",{value:""},"— Selecionar —"), ...NICHES.map(n=>r("option",{key:n,value:n},n))))
           ),
           r("div",{style:{display:"flex",gap:12}},
-            r("div",{style:{flex:1}}, r("div",{style:lSt},"Seguidores"), r("input",{value:cForm.seguidores,onInput:e=>setCForm(f=>({...f,seguidores:e.target.value})),placeholder:"ex: 1.2M",style:iSt})),
+            r("div",{style:{flex:1}}, r("div",{style:lSt},"Seguidores"), r("select",{value:cForm.seguidores,onChange:e=>setCForm(f=>({...f,seguidores:e.target.value})),style:{...iSt,cursor:"pointer"}},
+              r("option",{value:""},"— Selecionar —"),
+              r("option",{value:"0-10k"},"0-10k"),
+              r("option",{value:"10-100k"},"10-100k"),
+              r("option",{value:"100-500k"},"100-500k"),
+              r("option",{value:"500k+"},"500k+")
+            )),
             r("div",{style:{flex:1}}, r("div",{style:lSt},"Status"), r("select",{value:cForm.status,onChange:e=>setCForm(f=>({...f,status:e.target.value})),style:{...iSt,cursor:"pointer"}}, ...STATUSES.map(s=>r("option",{key:s,value:s},s))))
+          ),
+          r("div",null,
+            r("div",{style:lSt},"Prioridade"),
+            r("div",{style:{display:"flex",gap:8,marginTop:6}},
+              ...PRIORITY_KEYS.map(p => {
+                const [emoji, col] = PRIORITY[p];
+                const active = cForm.prioridade===p;
+                return r("button",{key:p, onClick:()=>setCForm(f=>({...f,prioridade:p})), style:{
+                  flex:1, padding:"9px 6px", borderRadius:8, cursor:"pointer", fontSize:13, fontWeight:600, ...sf,
+                  border: active ? `1px solid ${col}60` : `1px solid ${C.border}`,
+                  background: active ? `${col}15` : "transparent",
+                  color: active ? col : C.muted,
+                }}, `${emoji} ${p}`);
+              })
+            )
           ),
           r("div",null, r("div",{style:lSt},"Contato"), r("input",{value:cForm.contato,onInput:e=>setCForm(f=>({...f,contato:e.target.value})),placeholder:"e-mail, WhatsApp, @usuario...",style:iSt})),
           r("div",null, r("div",{style:lSt},"Link do Perfil"), r("input",{value:cForm.link,onInput:e=>setCForm(f=>({...f,link:e.target.value})),placeholder:"https://youtube.com/@canal",style:iSt})),
+          r("div",null,
+            r("div",{style:lSt},"Data do primeiro contato"),
+            r("input",{value:cForm.dataContato,onInput:e=>setCForm(f=>({...f,dataContato:e.target.value})),type:"date",style:iSt})
+          ),
+          r("div",null,
+            r("div",{style:lSt},"Orçamento"),
+            r("input",{value:cForm.orcamento,onInput:e=>setCForm(f=>({...f,orcamento:e.target.value})),placeholder:"ex: R$600, USD150...",style:iSt})
+          ),
           r("div",null, r("div",{style:lSt},"Observações"), r("textarea",{onInput:e=>setCForm(f=>({...f,observacoes:e.target.value})),placeholder:"Notas sobre esse criador...",rows:3,style:{...iSt,resize:"vertical"}},cForm.observacoes))
         ),
         r("div",{style:{display:"flex",gap:10,marginTop:22,justifyContent:"flex-end"}},
@@ -285,7 +351,45 @@ function App() {
       )
     );
 
-    return r("div",null, header, r("div",{style:{padding:"20px 28px"}},cards), modal);
+    const prospModal = prospectarModal && r("div",{
+      style:{position:"fixed",inset:0,background:"rgba(0,0,0,0.88)",display:"flex",alignItems:"center",justifyContent:"center",zIndex:999,padding:16},
+      onClick:e=>e.target===e.currentTarget&&setProspectarModal(false)
+    },
+      r("div",{style:{background:"#111",border:`1px solid ${C.border2}`,borderRadius:14,width:"100%",maxWidth:500,padding:28,...sf,maxHeight:"85vh",display:"flex",flexDirection:"column"}},
+        r("div",{style:{marginBottom:20}},
+          r("h2",{style:{margin:"0 0 6px",fontSize:17,fontWeight:700,color:C.text}},"🎯 Prospectar Hoje"),
+          r("p",{style:{fontSize:13,color:C.muted,margin:0}},
+            `${prospectarLote.length} canal${prospectarLote.length!==1?"is":""} aguardando contato. Clique em "Ver card" para abrir e atualizar o status conforme for prospectando.`
+          )
+        ),
+        prospectarLote.length === 0
+          ? r("div",{style:{textAlign:"center",padding:"30px 0",color:C.muted,fontSize:14}},"Nenhum canal em Prospectando no momento.")
+          : r("div",{style:{overflowY:"auto",flex:1,display:"flex",flexDirection:"column",gap:6,marginBottom:20}},
+              ...prospectarLote.map(c => {
+                const pc = PLAT_COLOR[c.plataforma]||"#888";
+                const [pri,col] = PRIORITY[c.prioridade]||["","#888"];
+                return r("div",{key:c.id,style:{display:"flex",alignItems:"center",gap:12,background:"#0D0D0D",border:`1px solid ${C.border}`,borderLeft:`3px solid ${pc}`,borderRadius:9,padding:"11px 14px"}},
+                  r("div",{style:{width:32,height:32,borderRadius:8,background:`${pc}18`,border:`1px solid ${pc}30`,display:"flex",alignItems:"center",justifyContent:"center",flexShrink:0}},
+                    r("svg",{viewBox:"0 0 24 24",width:16,height:16,fill:pc}, r("path",{d:PLAT_ICON[c.plataforma]||PLAT_ICON.Outro}))
+                  ),
+                  r("div",{style:{flex:1,minWidth:0}},
+                    r("div",{style:{fontWeight:600,fontSize:14,color:C.text,whiteSpace:"nowrap",overflow:"hidden",textOverflow:"ellipsis"}},c.nome),
+                    c.nicho && r("div",{style:{fontSize:12,color:C.muted,marginTop:1}},c.nicho)
+                  ),
+                  r("button",{
+                    onClick:()=>{ setProspectarModal(false); openCEdit(c); },
+                    style:{background:"transparent",border:`1px solid ${C.border2}`,borderRadius:6,color:C.sub,cursor:"pointer",padding:"5px 12px",fontSize:11,fontWeight:500,flexShrink:0,...sf}
+                  },"Ver card")
+                );
+              })
+            ),
+        r("div",{style:{display:"flex",justifyContent:"flex-end",borderTop:`1px solid ${C.border}`,paddingTop:18}},
+          r("button",{onClick:()=>setProspectarModal(false),style:{background:C.accent,border:"none",borderRadius:8,color:"#000",padding:"9px 24px",fontSize:13,fontWeight:700,cursor:"pointer",...sf}},"Fechar")
+        )
+      )
+    );
+
+    return r("div",null, header, r("div",{style:{padding:"20px 28px"}},cards), modal, prospModal);
   }
 
   // ══════════════════════════════════════════════════════════
