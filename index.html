@@ -95,6 +95,8 @@ function App() {
   const [meta,       setMeta]       = useState(0);
   const [editingMeta,setEditingMeta]= useState(false);
   const [metaInput,  setMetaInput]  = useState("");
+  const [links,      setLinks]      = useState([]);
+  const [linkInput,  setLinkInput]  = useState({label:"",url:""});
 
   const [loading, setLoading] = useState(true);
 
@@ -102,12 +104,14 @@ function App() {
     try { const s=localStorage.getItem("prospeccao_v1"); if(s) setCreators(JSON.parse(s)); } catch {}
     try { const s=localStorage.getItem("financeiro_v1");  if(s) setEntries(JSON.parse(s));  } catch {}
     try { const s=localStorage.getItem("meta_mensal");    if(s) setMeta(parseFloat(s)||0);  } catch {}
+    try { const s=localStorage.getItem("links_uteis");    if(s) setLinks(JSON.parse(s));     } catch {}
     setLoading(false);
   }, []);
 
   const saveC = l => { try { localStorage.setItem("prospeccao_v1", JSON.stringify(l)); } catch {} };
   const saveF = l => { try { localStorage.setItem("financeiro_v1",  JSON.stringify(l)); } catch {} };
   const saveM = v => { try { localStorage.setItem("meta_mensal", String(v)); } catch {} };
+  const saveL = l => { try { localStorage.setItem("links_uteis", JSON.stringify(l)); } catch {} };
 
   // ── NAV ──
   const TABS = [
@@ -570,11 +574,47 @@ function App() {
             )
           )
         )
+        , // links úteis
+        r("div",{style:{background:C.card,border:`1px solid ${C.border}`,borderRadius:12,padding:"20px"}},
+          r("div",{style:{...lSt,marginBottom:14}},"Links úteis"),
+          links.length>0 && r("div",{style:{display:"flex",flexDirection:"column",gap:6,marginBottom:14}},
+            ...links.map((lk,i)=>
+              r("div",{key:i,style:{display:"flex",alignItems:"center",gap:10,background:"#0A0A0A",border:`1px solid ${C.border}`,borderRadius:8,padding:"9px 12px"}},
+                r("svg",{viewBox:"0 0 24 24",width:13,height:13,fill:"none",stroke:C.muted,strokeWidth:2,strokeLinecap:"round",strokeLinejoin:"round",style:{flexShrink:0}},
+                  r("path",{d:"M10 13a5 5 0 0 0 7.54.54l3-3a5 5 0 0 0-7.07-7.07l-1.72 1.71"}),
+                  r("path",{d:"M14 11a5 5 0 0 0-7.54-.54l-3 3a5 5 0 0 0 7.07 7.07l1.71-1.71"})
+                ),
+                r("span",{style:{fontSize:13,fontWeight:600,color:C.sub,flexShrink:0,minWidth:80}},lk.label),
+                r("a",{href:lk.url,target:"_blank",rel:"noopener noreferrer",style:{fontSize:12,color:C.muted,textDecoration:"none",overflow:"hidden",textOverflow:"ellipsis",whiteSpace:"nowrap",flex:1}},
+                  lk.url.replace(/^https?:\/\/(www\.)?/,"")
+                ),
+                r("button",{onClick:()=>{ const l=links.filter((_,j)=>j!==i); setLinks(l); saveL(l); },style:{background:"transparent",border:"none",color:C.muted,cursor:"pointer",fontSize:13,padding:"0 2px",flexShrink:0}},"✕")
+              )
+            )
+          ),
+          r("div",{style:{display:"flex",gap:8}},
+            r("input",{value:linkInput.label,onChange:e=>setLinkInput(l=>({...l,label:e.target.value})),placeholder:"Nome (ex: Portfólio)",style:{...iSt,marginTop:0,width:140,flexShrink:0}}),
+            r("input",{value:linkInput.url,onChange:e=>setLinkInput(l=>({...l,url:e.target.value})),placeholder:"https://...",style:{...iSt,marginTop:0,flex:1},
+              onKeyDown:e=>{
+                if(e.key==="Enter"&&linkInput.label.trim()&&linkInput.url.trim()){
+                  const url = linkInput.url.startsWith("http") ? linkInput.url : "https://"+linkInput.url;
+                  const l=[...links,{label:linkInput.label.trim(),url}]; setLinks(l); saveL(l); setLinkInput({label:"",url:""});
+                }
+              }
+            }),
+            r("button",{
+              onClick:()=>{
+                if(!linkInput.label.trim()||!linkInput.url.trim()) return;
+                const url = linkInput.url.startsWith("http") ? linkInput.url : "https://"+linkInput.url;
+                const l=[...links,{label:linkInput.label.trim(),url}]; setLinks(l); saveL(l); setLinkInput({label:"",url:""});
+              },
+              style:{background:"#222",border:`1px solid ${C.border2}`,borderRadius:8,color:C.text,cursor:"pointer",padding:"0 14px",fontSize:18,flexShrink:0,...sf}
+            },"+")
+          )
+        )
       )
     );
   }
-
-  // ── ROOT ──
   return r("div",{style:{minHeight:"100vh",background:C.bg,color:C.text,...sf}},
     !loading && section==="prospeccao" && renderProspeccao(),
     !loading && section==="financeiro" && renderFinanceiro(),
