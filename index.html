@@ -394,6 +394,7 @@ function App() {
                     r("div",{style:{fontWeight:600,fontSize:14,color:C.text,whiteSpace:"nowrap",overflow:"hidden",textOverflow:"ellipsis"}},c.nome),
                     c.nicho && r("div",{style:{fontSize:12,color:C.muted,marginTop:1}},c.nicho)
                   ),
+                  c.prioridade && r("span",{style:{fontSize:11,fontWeight:700,color:col,background:`${col}15`,border:`1px solid ${col}35`,borderRadius:6,padding:"3px 9px",flexShrink:0}}, `${pri} ${c.prioridade}`),
                   r("button",{
                     onClick:()=>{ setProspectarModal(false); openCEdit(c); },
                     style:{background:"transparent",border:`1px solid ${C.border2}`,borderRadius:6,color:C.sub,cursor:"pointer",padding:"5px 12px",fontSize:11,fontWeight:500,flexShrink:0,...sf}
