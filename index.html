@@ -599,6 +599,56 @@ function App() {
               style:{background:"#222",border:"1px solid "+C.border2,borderRadius:8,color:C.text,cursor:"pointer",padding:"0 14px",fontSize:18,flexShrink:0,...sf}
             },"+")
           )
+        ),
+        r("div",{style:{background:C.card,border:"1px solid "+C.border,borderRadius:12,padding:"20px"}},
+          r("div",{style:{...lSt,marginBottom:4}},"Backup dos dados"),
+          r("div",{style:{fontSize:12,color:C.muted,marginBottom:16,marginTop:4}},"Exporte seus dados pra guardar ou restaurar em outro dispositivo."),
+          r("div",{style:{display:"flex",gap:10,flexWrap:"wrap"}},
+            r("button",{
+              onClick:function(){
+                var data = {
+                  prospeccao: localStorage.getItem("prospeccao_v1"),
+                  financeiro: localStorage.getItem("financeiro_v1"),
+                  meta:        localStorage.getItem("meta_mensal"),
+                  links:       localStorage.getItem("links_uteis"),
+                  exportedAt:  new Date().toISOString()
+                };
+                var blob = new Blob([JSON.stringify(data,null,2)], {type:"application/json"});
+                var url  = URL.createObjectURL(blob);
+                var a    = document.createElement("a");
+                a.href   = url;
+                a.download = "backup-dashboard-"+new Date().toISOString().split("T")[0]+".json";
+                a.click();
+                URL.revokeObjectURL(url);
+              },
+              style:{background:C.accent,color:"#000",border:"none",borderRadius:8,padding:"9px 20px",fontSize:13,fontWeight:700,cursor:"pointer",...sf}
+            },"⬇ Exportar"),
+            r("label",{style:{background:"transparent",border:"1px solid "+C.border2,borderRadius:8,padding:"9px 20px",fontSize:13,fontWeight:600,cursor:"pointer",color:C.sub,...sf}},
+              "⬆ Importar",
+              r("input",{
+                type:"file", accept:".json",
+                style:{display:"none"},
+                onChange:function(e){
+                  var file = e.target.files[0];
+                  if(!file) return;
+                  var reader = new FileReader();
+                  reader.onload = function(ev){
+                    try {
+                      var data = JSON.parse(ev.target.result);
+                      if(data.prospeccao) localStorage.setItem("prospeccao_v1", data.prospeccao);
+                      if(data.financeiro)  localStorage.setItem("financeiro_v1",  data.financeiro);
+                      if(data.meta)        localStorage.setItem("meta_mensal",     data.meta);
+                      if(data.links)       localStorage.setItem("links_uteis",     data.links);
+                      window.location.reload();
+                    } catch(err) {
+                      alert("Arquivo inválido.");
+                    }
+                  };
+                  reader.readAsText(file);
+                }
+              })
+            )
+          )
         )
       )
     );
