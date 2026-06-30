@@ -181,7 +181,11 @@ function App() {
   );
 
   const openProspectar = () => {
-    const lote = creators.filter(c=>c.status==="Prospectando").slice(0,50);
+    const order = { Alta:0, Média:1, Baixa:2 };
+    const lote = creators
+      .filter(c=>c.status==="Prospectando")
+      .sort((a,b)=>(order[a.prioridade]??1)-(order[b.prioridade]??1))
+      .slice(0,50);
     setProspectarLote(lote);
     setProspectarModal(true);
   };
