@@ -112,6 +112,10 @@ function App() {
     setLoading(false);
   }, []);
 
+  useEffect(() => {
+    if (cFSt && !creators.some(c => c.status === cFSt)) setCFSt("");
+  }, [creators, cFSt]);
+
   const changeView = v => { setCView(v); try { localStorage.setItem("prospeccao_view", v); } catch {} };
   const saveC = l => { try { localStorage.setItem("prospeccao_v1", JSON.stringify(l)); } catch {} };
   const saveF = l => { try { localStorage.setItem("financeiro_v1",  JSON.stringify(l)); } catch {} };
@@ -228,7 +232,7 @@ function App() {
         )
       ),
       creators.length>0 && r("div", { style:{ display:"flex", gap:8, marginTop:16, paddingTop:16, borderTop:`1px solid ${C.border}`, flexWrap:"wrap" } },
-        ...[["", "Todos", creators.length, null], ...STATUSES.map(s=>[s, s, cSC[s], STAT[s][0]])].map(([val,label,count,dot])=>{
+        ...[["", "Todos", creators.length, null], ...STATUSES.map(s=>[s, s, cSC[s], STAT[s][0]])].filter(([val,label,count])=>val===""||count>0).map(([val,label,count,dot])=>{
           const active = cFSt===val;
           return r("button",{
             key:val||"todos",
